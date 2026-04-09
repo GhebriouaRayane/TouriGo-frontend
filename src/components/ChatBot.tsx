@@ -68,15 +68,31 @@ const createMessageId = () =>
 const SUGGESTION_PATHS: Record<string, string> = {
   "🏠 Voir l'immobilier": "/immobilier",
   "🏠 Immobilier": "/immobilier",
+  "🏠 Real estate": "/immobilier",
+  "🏠 Accommodation": "/immobilier",
+  "🏠 Accommodations": "/immobilier",
+  "🏠 Accommodation in Bejaia": "/immobilier?destination=bejaia",
+  "🏠 Accommodation in Algiers": "/immobilier?destination=alger",
   "🚗 Louer un véhicule": "/vehicules",
   "🚗 Véhicules": "/vehicules",
+  "🚗 Vehicles": "/vehicules",
+  "🚗 Vehicle in Bejaia": "/vehicules?destination=bejaia",
+  "🚗 Vehicle in Algiers": "/vehicules?destination=alger",
   "🌴 Découvrir des activités": "/activites",
   "🌴 Activités": "/activites",
+  "🌴 Activities": "/activites",
+  "🌴 Activities in Bejaia": "/activites?destination=bejaia",
+  "🌴 Activities in Algiers": "/activites?destination=alger",
   "🔑 Se connecter": "/connexion",
   "📝 S'inscrire": "/inscription",
+  "🔑 Log in": "/connexion",
+  "📝 Sign up": "/inscription",
   "✅ Devenir hôte": "/devenir-hote",
+  "✅ Become a host": "/devenir-hote",
   "📋 Voir toutes les annonces": "/resultats",
   "📋 Voir les annonces": "/resultats",
+  "📋 See all listings": "/resultats",
+  "📋 See listings": "/resultats",
   "🔍 Rechercher un logement": "/immobilier",
   "🔍 Chercher un véhicule": "/vehicules",
   "🔍 Voir les logements": "/immobilier",
@@ -84,6 +100,13 @@ const SUGGESTION_PATHS: Record<string, string> = {
   "🔍 Voir les activités": "/activites",
   "🔍 Chercher une activité": "/activites",
   "🔍 Voir les annonces": "/resultats",
+  "🔍 Search for accommodation": "/immobilier",
+  "🔍 Search for a vehicle": "/vehicules",
+  "🔍 Search for an activity": "/activites",
+  "🔍 See accommodations": "/immobilier",
+  "🔍 See vehicles": "/vehicules",
+  "🔍 See activities": "/activites",
+  "🔍 See listings": "/resultats",
   "📍 Activités à Béjaïa": "/activites?destination=bejaia",
   "📍 Activités à Alger": "/activites?destination=alger",
   "🏠 Logement à Béjaïa": "/immobilier?destination=bejaia",
@@ -92,10 +115,16 @@ const SUGGESTION_PATHS: Record<string, string> = {
   "🚗 Véhicule à Alger": "/vehicules?destination=alger",
   "🌴 Activités à Béjaïa": "/activites?destination=bejaia",
   "🌴 Activités à Alger": "/activites?destination=alger",
+  "📍 Activities in Bejaia": "/activites?destination=bejaia",
+  "📍 Activities in Algiers": "/activites?destination=alger",
   "🏠 Chercher un logement": "/immobilier",
   "🚗 Chercher un véhicule": "/vehicules",
   "🌴 Chercher une activité": "/activites",
+  "🏠 Search for accommodation": "/immobilier",
+  "🚗 Search for a vehicle": "/vehicules",
+  "🌴 Search for an activity": "/activites",
   "❓ Aide": "/centre-aide",
+  "❓ Help": "/centre-aide",
   "🏠 Real estate": "/immobilier",
   "🚗 Vehicles": "/vehicules",
   "🌴 Activities": "/activites",
@@ -130,14 +159,29 @@ const SUGGESTION_PATHS: Record<string, string> = {
 
 const getLinkLabel = (link: string, language: Language) => {
   const isArabic = language === "ar";
-  if (link.startsWith("/immobilier")) return isArabic ? "عرض العقارات" : "Voir l'immobilier";
-  if (link.startsWith("/vehicules")) return isArabic ? "عرض المركبات" : "Voir les véhicules";
-  if (link.startsWith("/activites")) return isArabic ? "عرض الأنشطة" : "Voir les activités";
-  if (link.startsWith("/devenir-hote")) return isArabic ? "أصبح مضيفًا" : "Devenir hôte";
-  if (link.startsWith("/connexion")) return isArabic ? "تسجيل الدخول" : "Se connecter";
-  if (link.startsWith("/resultats")) return isArabic ? "عرض النتائج" : "Voir les résultats";
-  if (link.startsWith("/centre-aide")) return isArabic ? "فتح المساعدة" : "Ouvrir l'aide";
-  return isArabic ? "فتح الصفحة" : "Ouvrir la page";
+  const isEnglish = language === "en";
+  if (link.startsWith("/immobilier")) {
+    return isArabic ? "عرض العقارات" : isEnglish ? "See accommodations" : "Voir l'immobilier";
+  }
+  if (link.startsWith("/vehicules")) {
+    return isArabic ? "عرض المركبات" : isEnglish ? "See vehicles" : "Voir les véhicules";
+  }
+  if (link.startsWith("/activites")) {
+    return isArabic ? "عرض الأنشطة" : isEnglish ? "See activities" : "Voir les activités";
+  }
+  if (link.startsWith("/devenir-hote")) {
+    return isArabic ? "أصبح مضيفًا" : isEnglish ? "Become a host" : "Devenir hôte";
+  }
+  if (link.startsWith("/connexion")) {
+    return isArabic ? "تسجيل الدخول" : isEnglish ? "Log in" : "Se connecter";
+  }
+  if (link.startsWith("/resultats")) {
+    return isArabic ? "عرض النتائج" : isEnglish ? "See results" : "Voir les résultats";
+  }
+  if (link.startsWith("/centre-aide")) {
+    return isArabic ? "فتح المساعدة" : isEnglish ? "Open help" : "Ouvrir l'aide";
+  }
+  return isArabic ? "فتح الصفحة" : isEnglish ? "Open page" : "Ouvrir la page";
 };
 
 const getCurrentContext = (): "immobilier" | "vehicule" | "activite" | undefined => {
@@ -205,16 +249,27 @@ export default function ChatBot() {
         inputAria: "رسالة إلى المساعد",
         sendAria: "إرسال",
       }
-    : {
-        openAria: "Ouvrir le chat assistant",
-        dialogAria: "Assistant TouriGo",
-        online: "En ligne",
-        newChatAria: "Nouvelle conversation",
-        closeAria: "Fermer le chat",
-        inputPlaceholder: "Écrivez votre message...",
-        inputAria: "Message au chatbot",
-        sendAria: "Envoyer",
-      };
+    : language === "en"
+      ? {
+          openAria: "Open assistant chat",
+          dialogAria: "TouriGo assistant",
+          online: "Online",
+          newChatAria: "New conversation",
+          closeAria: "Close chat",
+          inputPlaceholder: "Type your message...",
+          inputAria: "Message to assistant",
+          sendAria: "Send",
+        }
+      : {
+          openAria: "Ouvrir le chat assistant",
+          dialogAria: "Assistant TouriGo",
+          online: "En ligne",
+          newChatAria: "Nouvelle conversation",
+          closeAria: "Fermer le chat",
+          inputPlaceholder: "Écrivez votre message...",
+          inputAria: "Message au chatbot",
+          sendAria: "Envoyer",
+        };
 
   const initialMessages = useMemo(() => {
     if (typeof window === "undefined") return [];
@@ -382,9 +437,12 @@ export default function ChatBot() {
   const handleSuggestion = (suggestion: string, fallbackLink?: string) => {
     const needsFallbackLink =
       suggestion.includes("Filtrer par ville") ||
+      suggestion.includes("Filter by city") ||
       suggestion.includes("التصفية حسب المدينة") ||
       suggestion.includes("Voir les prix") ||
       suggestion.includes("Voir les tarifs") ||
+      suggestion.includes("See prices") ||
+      suggestion.includes("See rates") ||
       suggestion.includes("عرض الأسعار");
     const path =
       SUGGESTION_PATHS[suggestion] ??
@@ -406,11 +464,13 @@ export default function ChatBot() {
     }
   };
 
-  const formatTime = (date: Date) =>
-    date.toLocaleTimeString(language === "ar" ? "ar-DZ" : "fr-FR", {
+  const formatTime = (date: Date) => {
+    const locale = language === "ar" ? "ar-DZ" : language === "en" ? "en-US" : "fr-FR";
+    return date.toLocaleTimeString(locale, {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
 
   return (
     <>
