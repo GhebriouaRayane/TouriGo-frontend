@@ -161,7 +161,7 @@ export default function Immobilier() {
                 <TabsTrigger
                   key={type.id}
                   value={type.id}
-                  className="rounded-xl data-[state=active]:bg-[rgb(34,45,49)] data-[state=active]:text-white transition-all whitespace-nowrap px-4"
+                  className="rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white transition-all whitespace-nowrap px-4"
                 >
                   {type.label}
                 </TabsTrigger>
