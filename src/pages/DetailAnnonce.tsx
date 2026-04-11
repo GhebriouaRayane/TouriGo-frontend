@@ -51,6 +51,8 @@ const DETAIL_TRANSLATIONS = {
     "Resultats": "Results",
     "Aucun avis": "No reviews",
     "Partager": "Share",
+    "Lien copie !": "Link copied!",
+    "Annonce": "Listing",
     "Retirer des favoris": "Remove from favorites",
     "Sauvegarder": "Save",
     "chambres disponibles": "rooms available",
@@ -167,6 +169,8 @@ const DETAIL_TRANSLATIONS = {
     "Resultats": "النتائج",
     "Aucun avis": "لا توجد تقييمات",
     "Partager": "مشاركة",
+    "Lien copie !": "تم نسخ الرابط!",
+    "Annonce": "إعلان",
     "Retirer des favoris": "إزالة من المفضلة",
     "Sauvegarder": "حفظ",
     "chambres disponibles": "غرف متاحة",
@@ -449,6 +453,7 @@ export default function DetailAnnonce() {
   const [locationMapCoordinates, setLocationMapCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationMapLoading, setLocationMapLoading] = useState(false);
   const [locationMapError, setLocationMapError] = useState<string | null>(null);
+  const [shareCopied, setShareCopied] = useState(false);
   const { token, user } = useAuth();
   const { language, locale } = useLanguage();
   const tr = useMemo(() => makeTranslator(language, DETAIL_TRANSLATIONS), [language]);
@@ -1192,9 +1197,32 @@ export default function DetailAnnonce() {
             )}
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="rounded-full">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full"
+              onClick={async () => {
+                const url = window.location.href;
+                const title = listing?.title ?? tr("Annonce");
+                if (navigator.share) {
+                  try {
+                    await navigator.share({ title, url });
+                  } catch {
+                    // User cancelled or error — do nothing
+                  }
+                } else {
+                  try {
+                    await navigator.clipboard.writeText(url);
+                    setShareCopied(true);
+                    setTimeout(() => setShareCopied(false), 2000);
+                  } catch {
+                    // Clipboard not available
+                  }
+                }
+              }}
+            >
               <Share2 className="w-4 h-4 mr-2" />
-              {tr("Partager")}
+              {shareCopied ? tr("Lien copie !") : tr("Partager")}
             </Button>
             <Button variant="outline" size="sm" className="rounded-full" onClick={() => void toggleFavorite()}>
               <Heart className={`w-4 h-4 mr-2 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
