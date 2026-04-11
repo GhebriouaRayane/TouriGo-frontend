@@ -106,7 +106,7 @@ export default function Accueil() {
               <TabsList className="w-full grid grid-cols-3 bg-white/95 backdrop-blur-md p-1 rounded-2xl mb-4 shadow-lg">
                 <TabsTrigger
                   value="immobilier"
-                  className="rounded-xl transition-all"
+                  className="rounded-xl transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
                 >
                   <Home className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">{t("home.tabs.realEstate")}</span>
@@ -114,7 +114,7 @@ export default function Accueil() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="vehicule"
-                  className="rounded-xl transition-all"
+                  className="rounded-xl transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
                 >
                   <Car className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">{t("home.tabs.vehicle")}</span>
@@ -122,7 +122,7 @@ export default function Accueil() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="activite"
-                  className="rounded-xl transition-all"
+                  className="rounded-xl transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
                 >
                   <Palmtree className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">{t("home.tabs.activity")}</span>
