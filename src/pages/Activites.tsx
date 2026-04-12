@@ -47,14 +47,14 @@ function normalizeDifficulty(value: string | null): string {
     return "";
   }
   const normalized = normalizeText(value);
-  if (normalized === "easy" || normalized === "Debutant") {
-    return "Debutant";
+  if (normalized === "easy" || normalized === "facile" || normalized === "debutant") {
+    return "debutant";
   }
-  if (normalized === "medium" || normalized === "Intermediaire") {
-    return "Intermediaire";
+  if (normalized === "medium" || normalized === "moyen" || normalized === "intermediaire") {
+    return "intermediaire";
   }
-  if (normalized === "hard" || normalized === "Experimente") {
-    return "Experimente";
+  if (normalized === "hard" || normalized === "difficile" || normalized === "experimente") {
+    return "experimente";
   }
   return normalized;
 }
@@ -244,9 +244,9 @@ export default function Activites() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("common.all")}</SelectItem>
-                  <SelectItem value="Debutant">{t("activities.difficulty.easy")}</SelectItem>
-                  <SelectItem value="Intermediaire">{t("activities.difficulty.medium")}</SelectItem>
-                  <SelectItem value="Experimente">{t("activities.difficulty.hard")}</SelectItem>
+                  <SelectItem value="debutant">{t("activities.difficulty.easy")}</SelectItem>
+                  <SelectItem value="intermediaire">{t("activities.difficulty.medium")}</SelectItem>
+                  <SelectItem value="experimente">{t("activities.difficulty.hard")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
