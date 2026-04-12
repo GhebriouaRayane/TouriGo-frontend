@@ -213,13 +213,13 @@ export default function Vehicules() {
             <TabsList className="w-full grid grid-cols-2 bg-white/95 backdrop-blur-md p-1 rounded-2xl shadow-lg">
               <TabsTrigger
                 value="location"
-                className="rounded-xl data-[state=active]:bg-[rgb(34,45,49)] data-[state=active]:text-white transition-all"
+                className="rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white transition-all"
               >
                 {t("vehicles.tab.rental")}
               </TabsTrigger>
               <TabsTrigger
                 value="covoiturage"
-                className="rounded-xl data-[state=active]:bg-[rgb(34,45,49)] data-[state=active]:text-white transition-all"
+                className="rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white transition-all"
               >
                 {t("vehicles.tab.carpool")}
               </TabsTrigger>
