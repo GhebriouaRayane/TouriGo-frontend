@@ -2162,16 +2162,32 @@ export default function Dashboard() {
 
         <div ref={tabsAnchorRef}>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full mb-8 rounded-2xl p-1 flex-wrap h-auto border border-border" style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.08)" }}>
-              <TabsTrigger value="reservations" className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-[rgb(34,45,49)] data-[state=active]:text-white data-[state=active]:shadow-md">
+            <TabsList
+              className="w-full mb-8 rounded-2xl p-1 flex-wrap h-auto border border-border"
+              style={{
+                background: "rgba(255,255,255,0.85)",
+                backdropFilter: "blur(12px)",
+                boxShadow: "0 10px 15px -3px rgba(0,0,0,0.08)"
+              }}
+            >
+              <TabsTrigger
+                value="reservations"
+                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
+              >
                 <Calendar className="w-4 h-4" />
                 <span className="hidden sm:inline">{tr("Reservations")}</span>
               </TabsTrigger>
-              <TabsTrigger value="annonces" className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-[rgb(34,45,49)] data-[state=active]:text-white data-[state=active]:shadow-md">
+              <TabsTrigger
+                value="annonces"
+                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
+              >
                 <MapPin className="w-4 h-4" />
                 <span className="hidden sm:inline">{tr("Ajouter une annonce")}</span>
               </TabsTrigger>
-              <TabsTrigger value="messages" className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-[rgb(34,45,49)] data-[state=active]:text-white data-[state=active]:shadow-md">
+              <TabsTrigger
+                value="messages"
+                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
+              >
                 <MessageCircle className="w-4 h-4" />
                 <span className="hidden sm:inline">{tr("Messages")}</span>
                 {unreadNotificationsCount > 0 && (
@@ -2180,7 +2196,10 @@ export default function Dashboard() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="profil" className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-[rgb(34,45,49)] data-[state=active]:text-white data-[state=active]:shadow-md">
+              <TabsTrigger
+                value="profil"
+                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
+              >
                 <Settings className="w-4 h-4" />
                 <span className="hidden sm:inline">{tr("Parametre")}</span>
               </TabsTrigger>
