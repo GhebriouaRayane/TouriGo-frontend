@@ -4,10 +4,11 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Search, MapPin, Star, Heart, Palmtree, Compass, Waves, Mountain, Clock, Users } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { addFavoriteApi, ApiListing, getFavoriteIdsApi, getListingsApi, removeFavoriteApi } from "../lib/api";
 import { useLanguage } from "../context/LanguageContext";
+import { ALGERIA_WILAYAS, matchesWilaya, normalizeText, normalizeWilayaValue } from "../constants/wilayas";
 
 function parseDetails(details: string | null): Record<string, unknown> | null {
   if (!details) {
@@ -41,12 +42,6 @@ function asPositiveNumber(value: unknown): number | null {
   return null;
 }
 
-const normalizeText = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-
 function normalizeDifficulty(value: string | null): string {
   if (!value) {
     return "";
@@ -77,6 +72,7 @@ export default function Activites() {
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
   const { t, locale } = useLanguage();
+  const location = useLocation();
 
   const activityTypes = [
     { id: "tous", label: t("activities.tab.allThemes"), icon: Compass },
@@ -135,6 +131,19 @@ export default function Activites() {
     };
   }, [token]);
 
+  useEffect(() => {
+    const destination = new URLSearchParams(location.search).get("destination");
+    if (!destination) {
+      return;
+    }
+    const normalizedDestination = normalizeWilayaValue(destination);
+    if (!normalizedDestination) {
+      return;
+    }
+    setLocationFilter(normalizedDestination);
+    setAppliedLocationFilter(normalizedDestination);
+  }, [location.search]);
+
   const toggleFavorite = async (listingId: number) => {
     if (!token) {
       return;
@@ -158,15 +167,13 @@ export default function Activites() {
   };
 
   const filteredActivities = useMemo(() => {
-    const normalizedLocation = normalizeText(appliedLocationFilter);
     return listings.filter((activity) => {
       const category = (activity.category ?? "").trim().toLowerCase();
       const details = parseDetails(activity.details);
       const level = normalizeDifficulty(asNonEmptyString(details?.level));
       const matchesType = selectedType === "tous" || category === selectedType;
       const matchesDifficulty = appliedDifficultyFilter === "all" || level === appliedDifficultyFilter;
-      const matchesLocation =
-        appliedLocationFilter === "all" || normalizeText(activity.location).includes(normalizedLocation);
+      const matchesLocation = matchesWilaya(activity.location, appliedLocationFilter);
       return matchesType && matchesDifficulty && matchesLocation;
     });
   }, [appliedDifficultyFilter, appliedLocationFilter, listings, selectedType]);
@@ -222,8 +229,11 @@ export default function Activites() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("common.all")}</SelectItem>
-                  <SelectItem value="bejaia">Bejaia</SelectItem>
-                  <SelectItem value="alger">Alger</SelectItem>
+                  {ALGERIA_WILAYAS.map((wilaya) => (
+                    <SelectItem key={wilaya} value={wilaya}>
+                      {wilaya}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

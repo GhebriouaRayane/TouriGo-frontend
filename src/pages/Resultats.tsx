@@ -7,12 +7,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { addFavoriteApi, ApiListing, getFavoriteIdsApi, getListingsApi, removeFavoriteApi } from "../lib/api";
-
-const normalizeText = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+import { matchesWilaya, normalizeText, normalizeWilayaValue } from "../constants/wilayas";
 
 function parseListingTypeFilter(value: string | null): ApiListing["type"] | null {
   if (value === "immobilier" || value === "vehicule" || value === "activite") {
@@ -36,7 +31,7 @@ export default function Resultats() {
     [location.search]
   );
   const destinationFilter = useMemo(
-    () => normalizeText(new URLSearchParams(location.search).get("destination") ?? ""),
+    () => normalizeWilayaValue(new URLSearchParams(location.search).get("destination") ?? ""),
     [location.search]
   );
 
@@ -127,7 +122,7 @@ export default function Resultats() {
     }
 
     if (destinationFilter) {
-      data = data.filter((item) => normalizeText(item.location).includes(destinationFilter));
+      data = data.filter((item) => matchesWilaya(item.location, destinationFilter));
     }
 
     if (normalizedSearch) {

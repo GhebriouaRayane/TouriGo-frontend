@@ -4,10 +4,11 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Search, MapPin, Star, Heart, Fuel, Users, Gauge } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { addFavoriteApi, ApiListing, getFavoriteIdsApi, getListingsApi, removeFavoriteApi } from "../lib/api";
 import { useLanguage } from "../context/LanguageContext";
+import { ALGERIA_WILAYAS, matchesWilaya, normalizeWilayaValue } from "../constants/wilayas";
 
 function parseDetails(details: string | null): Record<string, unknown> | null {
   if (!details) {
@@ -58,12 +59,6 @@ function normalizeVehicleCategory(value: string | null | undefined): string {
   return (value ?? "").trim().toLowerCase();
 }
 
-const normalizeText = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-
 export default function Vehicules() {
   const [activeTab, setActiveTab] = useState<VehicleTab>("location");
   const [locationFilter, setLocationFilter] = useState("all");
@@ -75,6 +70,7 @@ export default function Vehicules() {
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
   const { t, locale } = useLanguage();
+  const location = useLocation();
 
   useEffect(() => {
     let mounted = true;
@@ -126,6 +122,19 @@ export default function Vehicules() {
     };
   }, [token]);
 
+  useEffect(() => {
+    const destination = new URLSearchParams(location.search).get("destination");
+    if (!destination) {
+      return;
+    }
+    const normalizedDestination = normalizeWilayaValue(destination);
+    if (!normalizedDestination) {
+      return;
+    }
+    setLocationFilter(normalizedDestination);
+    setAppliedLocationFilter(normalizedDestination);
+  }, [location.search]);
+
   const toggleFavorite = async (listingId: number) => {
     if (!token) {
       return;
@@ -149,7 +158,6 @@ export default function Vehicules() {
   };
 
   const filteredVehicles = useMemo(() => {
-    const normalizedLocation = normalizeText(appliedLocationFilter);
     const byTab = listings.filter((vehicle) => {
       const category = normalizeVehicleCategory(vehicle.category);
       if (activeTab === "covoiturage") {
@@ -159,15 +167,11 @@ export default function Vehicules() {
     });
 
     const byLocation = byTab.filter((vehicle) => {
-      if (appliedLocationFilter === "all") {
-        return true;
-      }
       const details = parseDetails(vehicle.details);
       const departurePlace = asNonEmptyString(details?.departure_place) ?? "";
       const destination = asNonEmptyString(details?.destination) ?? "";
       return [vehicle.location, departurePlace, destination]
-        .map((part) => normalizeText(part))
-        .some((part) => part.includes(normalizedLocation));
+        .some((part) => matchesWilaya(part, appliedLocationFilter));
     });
 
     if (appliedPriceFilter === "all") {
@@ -239,8 +243,11 @@ export default function Vehicules() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("common.all")}</SelectItem>
-                  <SelectItem value="bejaia">Bejaia</SelectItem>
-                  <SelectItem value="alger">Alger</SelectItem>
+                  {ALGERIA_WILAYAS.map((wilaya) => (
+                    <SelectItem key={wilaya} value={wilaya}>
+                      {wilaya}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

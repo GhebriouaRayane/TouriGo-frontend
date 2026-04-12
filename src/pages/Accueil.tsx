@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import PopularListings from "../components/PopularListings";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
+import { ALGERIA_WILAYAS, normalizeWilayaValue } from "../constants/wilayas";
 
 // Hook: mark elements with class "reveal" as "visible" when they scroll into view
 function useReveal() {
@@ -69,13 +70,16 @@ export default function Accueil() {
   ];
 
   const handleSearch = () => {
+    const targetPath =
+      activeTab === "immobilier" ? "/immobilier" : activeTab === "vehicule" ? "/vehicules" : "/activites";
+
     const query = new URLSearchParams();
-    if (destination) {
-      query.set("destination", destination);
+    const normalizedDestination = normalizeWilayaValue(destination);
+    if (normalizedDestination) {
+      query.set("destination", normalizedDestination);
     }
-    query.set("type", activeTab);
     const queryString = query.toString();
-    navigate(queryString ? `/resultats?${queryString}` : "/resultats");
+    navigate(queryString ? `${targetPath}?${queryString}` : targetPath);
   };
 
   return (
@@ -141,8 +145,11 @@ export default function Accueil() {
                         className="bg-transparent outline-none w-full text-foreground"
                       >
                         <option value="">{t("home.input.selectCity")}</option>
-                        <option value="bejaia">{t("home.city.bejaia")}</option>
-                        <option value="alger">{t("home.city.alger")}</option>
+                        {ALGERIA_WILAYAS.map((wilaya) => (
+                          <option key={wilaya} value={wilaya}>
+                            {wilaya}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-border hover:border-primary/40 transition-colors">
@@ -173,8 +180,11 @@ export default function Accueil() {
                         className="bg-transparent outline-none w-full text-foreground"
                       >
                         <option value="">{t("home.input.selectCity")}</option>
-                        <option value="bejaia">{t("home.city.bejaia")}</option>
-                        <option value="alger">{t("home.city.alger")}</option>
+                        {ALGERIA_WILAYAS.map((wilaya) => (
+                          <option key={wilaya} value={wilaya}>
+                            {wilaya}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-border hover:border-primary/40 transition-colors">
@@ -204,8 +214,11 @@ export default function Accueil() {
                         className="bg-transparent outline-none w-full text-foreground"
                       >
                         <option value="">{t("home.input.selectCity")}</option>
-                        <option value="bejaia">{t("home.city.bejaia")}</option>
-                        <option value="alger">{t("home.city.alger")}</option>
+                        {ALGERIA_WILAYAS.map((wilaya) => (
+                          <option key={wilaya} value={wilaya}>
+                            {wilaya}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-border hover:border-primary/40 transition-colors">
@@ -312,4 +325,3 @@ export default function Accueil() {
     </div>
   );
 }
-

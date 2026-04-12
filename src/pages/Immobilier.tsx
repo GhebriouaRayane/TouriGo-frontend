@@ -4,16 +4,11 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Search, MapPin, BedDouble, Bath, Square, Star, Heart } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { addFavoriteApi, ApiListing, getFavoriteIdsApi, getListingsApi, removeFavoriteApi } from "../lib/api";
 import { useLanguage } from "../context/LanguageContext";
-
-const normalizeText = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+import { ALGERIA_WILAYAS, matchesWilaya, normalizeWilayaValue } from "../constants/wilayas";
 
 type RealEstateTab = "tous" | "appartement" | "maison" | "studio" | "hotel" | "cabanon";
 
@@ -28,6 +23,7 @@ export default function Immobilier() {
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
   const { t, locale } = useLanguage();
+  const location = useLocation();
 
   const propertyTypes = [
     { id: "tous", label: t("realEstate.tab.allTypes") },
@@ -88,6 +84,19 @@ export default function Immobilier() {
     };
   }, [token]);
 
+  useEffect(() => {
+    const destination = new URLSearchParams(location.search).get("destination");
+    if (!destination) {
+      return;
+    }
+    const normalizedDestination = normalizeWilayaValue(destination);
+    if (!normalizedDestination) {
+      return;
+    }
+    setLocationFilter(normalizedDestination);
+    setAppliedLocationFilter(normalizedDestination);
+  }, [location.search]);
+
   const toggleFavorite = async (listingId: number) => {
     if (!token) {
       return;
@@ -111,13 +120,10 @@ export default function Immobilier() {
   };
 
   const filteredProperties = useMemo(() => {
-    const normalizedLocation = normalizeText(appliedLocationFilter);
-
     return listings.filter((property) => {
       const category = (property.category ?? "").trim().toLowerCase();
       const matchesType = selectedType === "tous" || category === selectedType;
-      const matchesLocation =
-        appliedLocationFilter === "all" || normalizeText(property.location).includes(normalizedLocation);
+      const matchesLocation = matchesWilaya(property.location, appliedLocationFilter);
       const matchesPrice =
         appliedPriceFilter === "all"
           ? true
@@ -181,8 +187,11 @@ export default function Immobilier() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("common.all")}</SelectItem>
-                  <SelectItem value="bejaia">Bejaia</SelectItem>
-                  <SelectItem value="alger">Alger</SelectItem>
+                  {ALGERIA_WILAYAS.map((wilaya) => (
+                    <SelectItem key={wilaya} value={wilaya}>
+                      {wilaya}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
