@@ -211,7 +211,7 @@ export default function Accueil() {
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-border hover:border-primary/40 transition-colors">
                       <Users className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                       <input
-                        type="text"
+                        type="number"
                         placeholder={t("home.input.participants")}
                         className="bg-transparent outline-none w-full text-foreground"
                       />
