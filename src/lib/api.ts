@@ -1,5 +1,5 @@
 const RAW_API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "/api/v1";
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "https://tourigo-backend.onrender.com/api/v1";
 
 const resolveApiBaseUrl = (raw: string) => {
   try {
