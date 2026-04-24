@@ -34,6 +34,87 @@ function ScrollToTop() {
   return null;
 }
 
+type CapacitorListenerHandle = {
+  remove?: () => Promise<void> | void;
+};
+
+type CapacitorAppPlugin = {
+  addListener?: (
+    eventName: string,
+    listener: (event: { canGoBack?: boolean }) => void
+  ) => Promise<CapacitorListenerHandle> | CapacitorListenerHandle;
+  exitApp?: () => Promise<void> | void;
+};
+
+type CapacitorBridge = {
+  isNativePlatform?: () => boolean;
+  Plugins?: {
+    App?: CapacitorAppPlugin;
+  };
+};
+
+function AndroidHardwareBackButton() {
+  const location = useLocation();
+  const locationRef = useRef(location.pathname);
+
+  useEffect(() => {
+    locationRef.current = location.pathname;
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const capacitorBridge = (window as Window & { Capacitor?: CapacitorBridge }).Capacitor;
+    const isNativePlatform =
+      typeof capacitorBridge?.isNativePlatform === "function"
+        ? capacitorBridge.isNativePlatform()
+        : window.location.protocol === "capacitor:" || window.location.protocol === "ionic:";
+    const appPlugin = capacitorBridge?.Plugins?.App;
+
+    if (!isNativePlatform || !appPlugin?.addListener) {
+      return;
+    }
+
+    let cancelled = false;
+    let listenerHandle: CapacitorListenerHandle | null = null;
+
+    const attach = async () => {
+      try {
+        const handle = await appPlugin.addListener?.("backButton", ({ canGoBack }) => {
+          if (canGoBack || locationRef.current !== "/") {
+            window.history.back();
+            return;
+          }
+          void appPlugin.exitApp?.();
+        });
+        if (!handle) {
+          return;
+        }
+        if (cancelled) {
+          await handle.remove?.();
+          return;
+        }
+        listenerHandle = handle;
+      } catch {
+        // Ignore listener errors to avoid crashing app startup.
+      }
+    };
+
+    void attach();
+
+    return () => {
+      cancelled = true;
+      if (listenerHandle) {
+        void listenerHandle.remove?.();
+      }
+    };
+  }, []);
+
+  return null;
+}
+
 function ProtectedRoute({ children }: { children: React.ReactElement }) {
   const { isAuthenticated, loading } = useAuth();
   const { t } = useLanguage();
@@ -83,6 +164,7 @@ export default function App() {
   return (
     <Router>
       <ScrollToTop />
+      <AndroidHardwareBackButton />
       <div className="min-h-screen bg-background flex flex-col">
         <NavbarNew theme={theme} onToggleTheme={onToggleTheme} />
         <main className="flex-grow">

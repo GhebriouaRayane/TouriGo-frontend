@@ -1,5 +1,45 @@
-const RAW_API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "https://tourigo-backend.onrender.com/api/v1";
+const DEFAULT_API_BASE_URL = "https://tourigo-backend.onrender.com/api/v1";
+
+const ENV_API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
+
+type CapacitorWindow = Window & {
+  Capacitor?: {
+    isNativePlatform?: () => boolean;
+  };
+};
+
+const NATIVE_WEBVIEW_PROTOCOLS = new Set(["capacitor:", "ionic:"]);
+
+function isNativeAppRuntime(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  const capacitorWindow = window as CapacitorWindow;
+  if (typeof capacitorWindow.Capacitor?.isNativePlatform === "function") {
+    try {
+      return capacitorWindow.Capacitor.isNativePlatform();
+    } catch {
+      // Ignore bridge errors and use protocol fallback below.
+    }
+  }
+  return NATIVE_WEBVIEW_PROTOCOLS.has(window.location.protocol);
+}
+
+function resolveRawApiBaseUrl(raw?: string): string {
+  if (!raw) {
+    return DEFAULT_API_BASE_URL;
+  }
+  if (/^https?:\/\//i.test(raw)) {
+    return raw;
+  }
+  // Relative API URLs work on web behind a proxy, but fail inside native WebView.
+  if (isNativeAppRuntime()) {
+    return DEFAULT_API_BASE_URL;
+  }
+  return raw;
+}
+
+const RAW_API_BASE_URL = resolveRawApiBaseUrl(ENV_API_BASE_URL);
 
 const resolveApiBaseUrl = (raw: string) => {
   try {

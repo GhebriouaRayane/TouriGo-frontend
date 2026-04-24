@@ -41,6 +41,7 @@ interface StoredMessage {
 const CHATBOT_URL = `${API_BASE_URL.replace(/\/+$/, "")}/chatbot`;
 const CHATBOT_STORAGE_PREFIX = "tourigo-chatbot-history-v1";
 const MAX_MESSAGES = 60;
+const CHATBOT_TIMEOUT_MS = 12000;
 
 const FALLBACK_WELCOME_BY_LANGUAGE: Record<Language, string> = {
   fr: "Bonjour ! 👋 Je suis votre assistant TouriGo. Comment puis-je vous aider ?",
@@ -231,6 +232,20 @@ const parseStoredMessages = (raw: string | null): Message[] => {
   }
 };
 
+async function fetchWithTimeout(input: string, init?: RequestInit, timeoutMs = CHATBOT_TIMEOUT_MS): Promise<Response> {
+  if (typeof AbortController === "undefined") {
+    return fetch(input, init);
+  }
+
+  const controller = new AbortController();
+  const timerId = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timerId);
+  }
+}
+
 export default function ChatBot() {
   const { language } = useLanguage();
   const storageKey = `${CHATBOT_STORAGE_PREFIX}-${language}`;
@@ -360,7 +375,7 @@ export default function ChatBot() {
       setWelcomeLoaded(true);
       setIsTyping(true);
       try {
-        const res = await fetch(`${CHATBOT_URL}/welcome?language=${encodeURIComponent(language)}`);
+        const res = await fetchWithTimeout(`${CHATBOT_URL}/welcome?language=${encodeURIComponent(language)}`);
         if (!res.ok) throw new Error("Unable to load welcome message");
         const data: ApiResponse = await res.json();
         setTimeout(() => {
@@ -395,17 +410,31 @@ export default function ChatBot() {
 
     try {
       const context = getCurrentContext();
-      const res = await fetch(`${CHATBOT_URL}/message`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: trimmed,
-          language,
-          ...(context ? { context } : {}),
-        }),
+      const query = new URLSearchParams({
+        message: trimmed,
+        language,
+        ...(context ? { context } : {}),
       });
-      if (!res.ok) throw new Error("Unable to send message");
-      const data: ApiResponse = await res.json();
+
+      let data: ApiResponse;
+      const getResponse = await fetchWithTimeout(`${CHATBOT_URL}/message?${query.toString()}`);
+      if (getResponse.ok) {
+        data = (await getResponse.json()) as ApiResponse;
+      } else {
+        // Fallback POST keeps compatibility for long prompts or strict proxies.
+        const postResponse = await fetchWithTimeout(`${CHATBOT_URL}/message`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: trimmed,
+            language,
+            ...(context ? { context } : {}),
+          }),
+        });
+        if (!postResponse.ok) throw new Error("Unable to send message");
+        data = (await postResponse.json()) as ApiResponse;
+      }
+
       setTimeout(() => {
         setIsTyping(false);
         addBotMessage(data.reply, data.suggestions, data.link);
