@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { Capacitor, PluginListenerHandle, registerPlugin } from "@capacitor/core";
 import { BrowserRouter as Router, Link, Navigate, Route, Routes, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 // Page transition wrapper — fades in when route changes
@@ -34,26 +35,18 @@ function ScrollToTop() {
   return null;
 }
 
-type CapacitorListenerHandle = {
-  remove?: () => Promise<void> | void;
-};
-
 type CapacitorAppPlugin = {
-  addListener?: (
-    eventName: string,
-    listener: (event: { canGoBack?: boolean }) => void
-  ) => Promise<CapacitorListenerHandle> | CapacitorListenerHandle;
-  exitApp?: () => Promise<void> | void;
+  addListener: (
+    eventName: "backButton",
+    listener: (event: { canGoBack: boolean }) => void
+  ) => Promise<PluginListenerHandle> | PluginListenerHandle;
+  exitApp: () => Promise<void>;
 };
 
-type CapacitorBridge = {
-  isNativePlatform?: () => boolean;
-  Plugins?: {
-    App?: CapacitorAppPlugin;
-  };
-};
+const CapacitorApp = registerPlugin<CapacitorAppPlugin>("App");
 
 function AndroidHardwareBackButton() {
+  const navigate = useNavigate();
   const location = useLocation();
   const locationRef = useRef(location.pathname);
 
@@ -62,38 +55,32 @@ function AndroidHardwareBackButton() {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const capacitorBridge = (window as Window & { Capacitor?: CapacitorBridge }).Capacitor;
-    const isNativePlatform =
-      typeof capacitorBridge?.isNativePlatform === "function"
-        ? capacitorBridge.isNativePlatform()
-        : window.location.protocol === "capacitor:" || window.location.protocol === "ionic:";
-    const appPlugin = capacitorBridge?.Plugins?.App;
-
-    if (!isNativePlatform || !appPlugin?.addListener) {
+    if (!Capacitor.isNativePlatform()) {
       return;
     }
 
     let cancelled = false;
-    let listenerHandle: CapacitorListenerHandle | null = null;
+    let listenerHandle: PluginListenerHandle | null = null;
 
     const attach = async () => {
       try {
-        const handle = await appPlugin.addListener?.("backButton", ({ canGoBack }) => {
-          if (canGoBack || locationRef.current !== "/") {
-            window.history.back();
-            return;
-          }
-          void appPlugin.exitApp?.();
-        });
-        if (!handle) {
-          return;
-        }
+        const handle = await Promise.resolve(
+          CapacitorApp.addListener("backButton", ({ canGoBack }) => {
+            const isRootRoute = locationRef.current === "/";
+            if (canGoBack) {
+              navigate(-1);
+              return;
+            }
+            if (!isRootRoute) {
+              navigate("/", { replace: true });
+              return;
+            }
+            void CapacitorApp.exitApp();
+          })
+        );
+
         if (cancelled) {
-          await handle.remove?.();
+          await handle.remove();
           return;
         }
         listenerHandle = handle;
@@ -107,10 +94,10 @@ function AndroidHardwareBackButton() {
     return () => {
       cancelled = true;
       if (listenerHandle) {
-        void listenerHandle.remove?.();
+        void listenerHandle.remove();
       }
     };
-  }, []);
+  }, [navigate]);
 
   return null;
 }
