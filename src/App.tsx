@@ -43,6 +43,10 @@ type CapacitorAppPlugin = {
   exitApp: () => Promise<void>;
 };
 
+type BrowserHistoryState = {
+  idx?: number;
+};
+
 const CapacitorApp = registerPlugin<CapacitorAppPlugin>("App");
 
 function AndroidHardwareBackButton() {
@@ -67,7 +71,11 @@ function AndroidHardwareBackButton() {
         const handle = await Promise.resolve(
           CapacitorApp.addListener("backButton", ({ canGoBack }) => {
             const isRootRoute = locationRef.current === "/";
-            if (canGoBack) {
+            const historyState = window.history.state as BrowserHistoryState | null;
+            const hasBrowserHistory =
+              typeof historyState?.idx === "number" ? historyState.idx > 0 : window.history.length > 1;
+
+            if (canGoBack || hasBrowserHistory) {
               navigate(-1);
               return;
             }
@@ -84,8 +92,8 @@ function AndroidHardwareBackButton() {
           return;
         }
         listenerHandle = handle;
-      } catch {
-        // Ignore listener errors to avoid crashing app startup.
+      } catch (error) {
+        console.warn("Unable to attach Android back button listener.", error);
       }
     };
 
