@@ -8,9 +8,20 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { addFavoriteApi, ApiListing, getFavoriteIdsApi, getListingsApi, removeFavoriteApi } from "../lib/api";
 import { useLanguage } from "../context/LanguageContext";
-import { ALGERIA_WILAYAS, matchesWilaya, normalizeWilayaValue } from "../constants/wilayas";
+import { ALGERIA_WILAYAS, matchesWilaya, normalizeText, normalizeWilayaValue } from "../constants/wilayas";
 
 type RealEstateTab = "tous" | "appartement" | "maison" | "studio" | "hotel" | "cabanon";
+
+function hasAvailabilityDate(availabilityDates: string | null, selectedDate: string): boolean {
+  if (!selectedDate) {
+    return true;
+  }
+  const dates = (availabilityDates ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  return dates.includes(selectedDate);
+}
 
 export default function Immobilier() {
   const [selectedType, setSelectedType] = useState<RealEstateTab>("tous");
@@ -24,6 +35,7 @@ export default function Immobilier() {
   const { token } = useAuth();
   const { t, locale } = useLanguage();
   const location = useLocation();
+  const requestedDate = new URLSearchParams(location.search).get("date") ?? "";
 
   const propertyTypes = [
     { id: "tous", label: t("realEstate.tab.allTypes") },
@@ -121,8 +133,8 @@ export default function Immobilier() {
 
   const filteredProperties = useMemo(() => {
     return listings.filter((property) => {
-      const category = (property.category ?? "").trim().toLowerCase();
-      const matchesType = selectedType === "tous" || category === selectedType;
+      const category = normalizeText((property.category ?? "").trim());
+      const matchesType = selectedType === "tous" || category === normalizeText(selectedType);
       const matchesLocation = matchesWilaya(property.location, appliedLocationFilter);
       const matchesPrice =
         appliedPriceFilter === "all"
@@ -132,10 +144,11 @@ export default function Immobilier() {
             : appliedPriceFilter === "20000-40000"
               ? property.price > 20000 && property.price <= 40000
               : property.price > 40000;
+      const matchesDate = hasAvailabilityDate(property.availability_dates, requestedDate);
 
-      return matchesType && matchesLocation && matchesPrice;
+      return matchesType && matchesLocation && matchesPrice && matchesDate;
     });
-  }, [appliedLocationFilter, appliedPriceFilter, listings, selectedType]);
+  }, [appliedLocationFilter, appliedPriceFilter, listings, requestedDate, selectedType]);
 
   const applyFilters = () => {
     setAppliedLocationFilter(locationFilter);

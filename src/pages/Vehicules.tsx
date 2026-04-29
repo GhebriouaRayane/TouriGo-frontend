@@ -8,7 +8,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { addFavoriteApi, ApiListing, getFavoriteIdsApi, getListingsApi, removeFavoriteApi } from "../lib/api";
 import { useLanguage } from "../context/LanguageContext";
-import { ALGERIA_WILAYAS, matchesWilaya, normalizeWilayaValue } from "../constants/wilayas";
+import { ALGERIA_WILAYAS, matchesWilaya, normalizeText, normalizeWilayaValue } from "../constants/wilayas";
 
 function parseDetails(details: string | null): Record<string, unknown> | null {
   if (!details) {
@@ -56,7 +56,7 @@ function formatOptionalIsoDate(value: string | null, locale: string): string | n
 type VehicleTab = "location" | "covoiturage";
 
 function normalizeVehicleCategory(value: string | null | undefined): string {
-  return (value ?? "").trim().toLowerCase();
+  return normalizeText((value ?? "").trim());
 }
 
 export default function Vehicules() {

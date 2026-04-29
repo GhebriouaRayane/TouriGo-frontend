@@ -31,6 +31,9 @@ function useReveal() {
 export default function Accueil() {
   const [activeTab, setActiveTab] = useState<"immobilier" | "vehicule" | "activite">("immobilier");
   const [destination, setDestination] = useState("");
+  const [stayDate, setStayDate] = useState("");
+  const [vehiclePeriod, setVehiclePeriod] = useState("");
+  const [activityParticipants, setActivityParticipants] = useState("");
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { isAuthenticated, user, loading } = useAuth();
@@ -77,6 +80,15 @@ export default function Accueil() {
     const normalizedDestination = normalizeWilayaValue(destination);
     if (normalizedDestination) {
       query.set("destination", normalizedDestination);
+    }
+    if (activeTab === "immobilier" && stayDate) {
+      query.set("date", stayDate);
+    }
+    if (activeTab === "vehicule" && vehiclePeriod.trim()) {
+      query.set("period", vehiclePeriod.trim());
+    }
+    if (activeTab === "activite" && activityParticipants.trim()) {
+      query.set("participants", activityParticipants.trim());
     }
     const queryString = query.toString();
     navigate(queryString ? `${targetPath}?${queryString}` : targetPath);
@@ -156,6 +168,8 @@ export default function Accueil() {
                       <Calendar className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                       <input
                         type="date"
+                        value={stayDate}
+                        onChange={(event) => setStayDate(event.target.value)}
                         placeholder={t("home.input.dates")}
                         className="bg-transparent outline-none w-full text-foreground"
                       />
@@ -190,7 +204,10 @@ export default function Accueil() {
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-border hover:border-primary/40 transition-colors">
                       <Calendar className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                       <input
-                        type="number" min="1"
+                        type="number"
+                        min="1"
+                        value={vehiclePeriod}
+                        onChange={(event) => setVehiclePeriod(event.target.value)}
                         placeholder={t("home.input.period")}
                         className="bg-transparent outline-none w-full text-foreground"
                       />
@@ -225,6 +242,9 @@ export default function Accueil() {
                       <Users className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                       <input
                         type="number"
+                        min="1"
+                        value={activityParticipants}
+                        onChange={(event) => setActivityParticipants(event.target.value)}
                         placeholder={t("home.input.participants")}
                         className="bg-transparent outline-none w-full text-foreground"
                       />

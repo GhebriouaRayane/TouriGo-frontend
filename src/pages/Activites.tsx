@@ -73,6 +73,7 @@ export default function Activites() {
   const { token } = useAuth();
   const { t, locale } = useLanguage();
   const location = useLocation();
+  const requestedParticipants = Number(new URLSearchParams(location.search).get("participants") ?? "");
 
   const activityTypes = [
     { id: "tous", label: t("activities.tab.allThemes"), icon: Compass },
@@ -168,15 +169,20 @@ export default function Activites() {
 
   const filteredActivities = useMemo(() => {
     return listings.filter((activity) => {
-      const category = (activity.category ?? "").trim().toLowerCase();
+      const category = normalizeText((activity.category ?? "").trim());
       const details = parseDetails(activity.details);
       const level = normalizeDifficulty(asNonEmptyString(details?.level));
-      const matchesType = selectedType === "tous" || category === selectedType;
+      const participantsMax = asPositiveNumber(details?.participants_max);
+      const matchesType = selectedType === "tous" || category === normalizeText(selectedType);
       const matchesDifficulty = appliedDifficultyFilter === "all" || level === appliedDifficultyFilter;
       const matchesLocation = matchesWilaya(activity.location, appliedLocationFilter);
-      return matchesType && matchesDifficulty && matchesLocation;
+      const matchesParticipants =
+        !Number.isFinite(requestedParticipants) || requestedParticipants <= 0
+          ? true
+          : participantsMax !== null && participantsMax >= requestedParticipants;
+      return matchesType && matchesDifficulty && matchesLocation && matchesParticipants;
     });
-  }, [appliedDifficultyFilter, appliedLocationFilter, listings, selectedType]);
+  }, [appliedDifficultyFilter, appliedLocationFilter, listings, requestedParticipants, selectedType]);
 
   const applyFilters = () => {
     setAppliedLocationFilter(locationFilter);
