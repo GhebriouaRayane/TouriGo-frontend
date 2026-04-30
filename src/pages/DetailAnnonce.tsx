@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import type { Locale } from "date-fns";
+import { ar, enUS, fr } from "date-fns/locale";
 import { Link, useParams } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Button } from "../components/ui/button";
+import { Calendar as CalendarPicker } from "../components/ui/calendar";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { addFavoriteApi, ApiListing, ApiReview, createBookingApi, createReviewApi, getFavoriteIdsApi, getListingByIdApi, getListingReviewsApi, removeFavoriteApi } from "../lib/api";
 import { makeTranslator } from "../i18n/localize";
-import { Bath, BedDouble, Car, CheckCircle, ChevronLeft, ChevronRight, Clock3, Fuel, Gauge, Heart, MapPin, MessageCircle, Share2, Star, Users } from "lucide-react";
+import { Bath, BedDouble, Car, CheckCircle, ChevronLeft, ChevronRight, Clock3, Fuel, Gauge, Heart, MapPin, Share2, Star, Users } from "lucide-react";
 
 const DETAIL_TRANSLATIONS = {
   fr: {},
@@ -89,12 +92,11 @@ const DETAIL_TRANSLATIONS = {
     "Aucun commentaire.": "No comment.",
     "Equipements": "Amenities",
     "Dates disponibles": "Available dates",
+    "{count} date(s) disponible(s)": "{count} available date(s)",
     "Aucune date specifique renseignee par l'hote.": "No specific date provided by the host.",
     "Votre hote": "Your host",
     "Hote 3ich": "3ich host",
     "Profil verifie": "Verified profile",
-    "Tel": "Phone",
-    "WhatsApp indisponible": "WhatsApp unavailable",
     "Date et heure disponibles": "Available date and time",
     "Places a reserver": "Seats to book",
     "Date": "Date",
@@ -207,12 +209,11 @@ const DETAIL_TRANSLATIONS = {
     "Aucun commentaire.": "لا يوجد تعليق.",
     "Equipements": "المرافق",
     "Dates disponibles": "التواريخ المتاحة",
+    "{count} date(s) disponible(s)": "{count} تاريخ/تواريخ متاحة",
     "Aucune date specifique renseignee par l'hote.": "لم يحدد المضيف تواريخ محددة.",
     "Votre hote": "مضيفك",
     "Hote 3ich": "مضيف 3ich",
     "Profil verifie": "ملف موثّق",
-    "Tel": "الهاتف",
-    "WhatsApp indisponible": "واتساب غير متاح",
     "Date et heure disponibles": "التاريخ والوقت المتاحان",
     "Places a reserver": "المقاعد المطلوب حجزها",
     "Date": "التاريخ",
@@ -457,6 +458,15 @@ export default function DetailAnnonce() {
   const { token, user } = useAuth();
   const { language, locale } = useLanguage();
   const tr = useMemo(() => makeTranslator(language, DETAIL_TRANSLATIONS), [language]);
+  const calendarLocale = useMemo<Locale>(() => {
+    if (language === "ar") {
+      return ar;
+    }
+    if (language === "en") {
+      return enUS;
+    }
+    return fr;
+  }, [language]);
   const defaultAmenities = useMemo(
     () => [
       tr("WiFi haut débit"),
@@ -721,6 +731,14 @@ export default function DetailAnnonce() {
     () => parseAvailabilityDates(listing?.availability_dates ?? null),
     [listing?.availability_dates]
   );
+  const availabilityDateObjects = useMemo(
+    () => availabilityDates.map((availabilityDate) => isoDateToLocalDate(availabilityDate)),
+    [availabilityDates]
+  );
+  const availabilityDefaultMonth = useMemo(
+    () => availabilityDateObjects[0] ?? new Date(),
+    [availabilityDateObjects]
+  );
 
   useEffect(() => {
     if (availabilityDates.length === 0) {
@@ -957,19 +975,6 @@ export default function DetailAnnonce() {
       value: tr("{count} voyageurs", { count: travelersCount }),
     };
   }, [activityDetails.participantsMax, carpoolDetails.passengersMax, isCarpoolListing, listing, travelersCount, vehicleDetails.seats, tr]);
-
-  const whatsappLink = useMemo(() => {
-    const rawPhone = listing?.owner_phone_number;
-    if (!rawPhone) {
-      return null;
-    }
-    const digits = rawPhone.replace(/[^\d]/g, "");
-    if (!digits) {
-      return null;
-    }
-    const normalized = digits.startsWith("0") ? `213${digits.slice(1)}` : digits;
-    return `https://wa.me/${normalized}`;
-  }, [listing?.owner_phone_number]);
 
   const reviewStats = useMemo(() => {
     if (reviews.length === 0) {
@@ -1516,12 +1521,42 @@ export default function DetailAnnonce() {
               {availabilityDates.length === 0 ? (
                 <p className="text-muted-foreground">{tr("Aucune date specifique renseignee par l'hote.")}</p>
               ) : (
-                <div className="flex flex-wrap gap-2">
-                  {availabilityDates.map((availabilityDate) => (
-                    <span key={availabilityDate} className="px-3 py-1 rounded-full bg-gray-100 border border-border text-sm">
-                      {isoDateToLocalDate(availabilityDate).toLocaleDateString(locale)}
+                <div className="overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50 shadow-sm">
+                  <CalendarPicker
+                    className="w-full p-4"
+                    locale={calendarLocale}
+                    weekStartsOn={1}
+                    defaultMonth={availabilityDefaultMonth}
+                    showOutsideDays={false}
+                    modifiers={{ available: availabilityDateObjects }}
+                    modifiersStyles={{
+                      available: {
+                        backgroundColor: "rgb(130, 133, 134)",
+                        color: "#ffffff",
+                        borderRadius: "9999px",
+                      },
+                    }}
+                    modifiersClassNames={{
+                      available: "!text-white font-bold shadow-sm ring-2 ring-border ring-offset-2 hover:!text-white focus:!text-white dark:!text-white dark:hover:!text-white dark:focus:!text-white",
+                      today: "ring-2 ring-amber-300 ring-offset-2",
+                    }}
+                    classNames={{
+                      months: "flex flex-col gap-4",
+                      month: "w-full space-y-4",
+                      caption: "relative flex items-center justify-center pb-2",
+                      caption_label: "text-base font-semibold capitalize text-foreground",
+                      table: "w-full table-fixed border-separate [border-spacing:0.35rem_0.35rem]",
+                      head_cell: "h-8 p-0 text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground",
+                      cell: "h-10 p-0 text-center align-middle text-sm",
+                      day: "mx-auto flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-medium text-foreground transition-colors hover:bg-muted hover:text-foreground",
+                    }}
+                  />
+                  <div className="border-t border-emerald-100 bg-white/80 px-5 py-3 text-sm text-muted-foreground">
+                    <span className="inline-flex items-center gap-2">
+                      <span className="h-3 w-3 rounded-full bg-slate-300" />
+                      {tr("{count} date(s) disponible(s)", { count: availabilityDates.length })}
                     </span>
-                  ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -1536,22 +1571,6 @@ export default function DetailAnnonce() {
                 <div>
                   <h4 className="font-bold text-lg">{listing.owner_full_name ?? tr("Hote 3ich")}</h4>
                   <p className="text-sm text-muted-foreground mb-2">{tr("Profil verifie")}</p>
-                  {listing.owner_phone_number && (
-                    <p className="text-sm text-muted-foreground mb-2">{tr("Tel")}: {listing.owner_phone_number}</p>
-                  )}
-                  {whatsappLink ? (
-                    <a href={whatsappLink} target="_blank" rel="noreferrer">
-                      <Button variant="outline" size="sm" className="rounded-full">
-                        <MessageCircle className="w-4 h-4 mr-2" />
-                        WhatsApp
-                      </Button>
-                    </a>
-                  ) : (
-                    <Button variant="outline" size="sm" className="rounded-full" disabled>
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      {tr("WhatsApp indisponible")}
-                    </Button>
-                  )}
                 </div>
               </div>
             </div>
