@@ -2,15 +2,9 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { Capacitor, PluginListenerHandle, registerPlugin } from "@capacitor/core";
 import { BrowserRouter as Router, Link, Navigate, Route, Routes, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
-// Page transition wrapper — fades in when route changes
-function PageTransition({ children }: { children: React.ReactNode }) {
-  const location = useLocation();
-  return (
-    <div key={location.pathname} className="page-enter">
-      {children}
-    </div>
-  );
-}
+import { AnimatePresence, motion } from "framer-motion";
+
+// Removed old PageTransition
 import ChatBot from "./components/ChatBot";
 import FooterNew from "./components/FooterNew";
 import NavbarNew from "./components/NavbarNew";
@@ -143,6 +137,58 @@ function getInitialTheme(): Theme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -15 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="w-full h-full"
+      >
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<Accueil />} />
+          <Route path="/immobilier" element={<Immobilier />} />
+          <Route path="/vehicules" element={<Vehicules />} />
+          <Route path="/activites" element={<Activites />} />
+          <Route path="/devenir-hote" element={<DevenirHote />} />
+          <Route path="/resultats" element={<Resultats />} />
+          <Route path="/detail/:id" element={<DetailAnnonce />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/connexion" element={<Login />} />
+          <Route path="/inscription" element={<Register />} />
+          <Route path="/a-propos" element={<StaticPage pageKey="about" />} />
+          <Route path="/comment-ca-marche" element={<StaticPage pageKey="howItWorks" />} />
+          <Route path="/carrieres" element={<StaticPage pageKey="careers" />} />
+          <Route path="/presse" element={<StaticPage pageKey="press" />} />
+          <Route path="/centre-aide" element={<StaticPage pageKey="helpCenter" />} />
+          <Route path="/contact" element={<StaticPage pageKey="contact" />} />
+          <Route path="/conditions-utilisation" element={<StaticPage pageKey="terms" />} />
+          <Route path="/politique-confidentialite" element={<StaticPage pageKey="privacy" />} />
+          <Route path="/ressources-hotes" element={<StaticPage pageKey="hostResources" />} />
+          <Route path="/assurance-hote" element={<StaticPage pageKey="hostInsurance" />} />
+          <Route path="/blog" element={<StaticPage pageKey="blog" />} />
+          <Route path="/mentions-legales" element={<StaticPage pageKey="legal" />} />
+          <Route path="/politique-cookies" element={<StaticPage pageKey="cookies" />} />
+          <Route path="/plan-site" element={<StaticPage pageKey="sitemap" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 export default function App() {
   const [theme, setTheme] = useState<Theme>(() => getInitialTheme());
 
@@ -163,42 +209,7 @@ export default function App() {
       <div className="min-h-screen bg-background flex flex-col">
         <NavbarNew theme={theme} onToggleTheme={onToggleTheme} />
         <main className="flex-grow">
-          <PageTransition>
-            <Routes>
-              <Route path="/" element={<Accueil />} />
-              <Route path="/immobilier" element={<Immobilier />} />
-              <Route path="/vehicules" element={<Vehicules />} />
-              <Route path="/activites" element={<Activites />} />
-              <Route path="/devenir-hote" element={<DevenirHote />} />
-              <Route path="/resultats" element={<Resultats />} />
-              <Route path="/detail/:id" element={<DetailAnnonce />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/connexion" element={<Login />} />
-              <Route path="/inscription" element={<Register />} />
-              <Route path="/a-propos" element={<StaticPage pageKey="about" />} />
-              <Route path="/comment-ca-marche" element={<StaticPage pageKey="howItWorks" />} />
-              <Route path="/carrieres" element={<StaticPage pageKey="careers" />} />
-              <Route path="/presse" element={<StaticPage pageKey="press" />} />
-              <Route path="/centre-aide" element={<StaticPage pageKey="helpCenter" />} />
-              <Route path="/contact" element={<StaticPage pageKey="contact" />} />
-              <Route path="/conditions-utilisation" element={<StaticPage pageKey="terms" />} />
-              <Route path="/politique-confidentialite" element={<StaticPage pageKey="privacy" />} />
-              <Route path="/ressources-hotes" element={<StaticPage pageKey="hostResources" />} />
-              <Route path="/assurance-hote" element={<StaticPage pageKey="hostInsurance" />} />
-              <Route path="/blog" element={<StaticPage pageKey="blog" />} />
-              <Route path="/mentions-legales" element={<StaticPage pageKey="legal" />} />
-              <Route path="/politique-cookies" element={<StaticPage pageKey="cookies" />} />
-              <Route path="/plan-site" element={<StaticPage pageKey="sitemap" />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </PageTransition>
+          <AnimatedRoutes />
         </main>
         <FooterNew />
         <ChatBot />

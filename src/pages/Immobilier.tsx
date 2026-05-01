@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Search, MapPin, BedDouble, Bath, Square, Star, Heart } from "lucide-react";
@@ -240,12 +241,19 @@ export default function Immobilier() {
           <div className="py-12 text-center text-muted-foreground">{t("realEstate.empty")}</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProperties.map((property) => (
-              <Link
+            {filteredProperties.map((property, index) => (
+              <motion.div
                 key={property.id}
-                to={`/detail/${property.id}`}
-                className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col border border-border"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                whileHover={{ y: -5 }}
               >
+                <Link
+                  to={`/detail/${property.id}`}
+                  className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col border border-border h-full"
+                >
                 <div className="relative h-56 overflow-hidden">
                   <ImageWithFallback
                     src={property.images[0]?.url ?? "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600"}
@@ -307,6 +315,7 @@ export default function Immobilier() {
                   </div>
                 </div>
               </Link>
+              </motion.div>
             ))}
           </div>
         )}

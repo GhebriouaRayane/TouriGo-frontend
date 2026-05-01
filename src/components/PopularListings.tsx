@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { Heart, Star, MapPin } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Button } from "./ui/button";
@@ -123,12 +124,19 @@ export default function PopularListings() {
           <div className="py-8 text-center text-muted-foreground">{t("popular.empty")}</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
-            {listings.map((listing) => (
-              <Link
+            {listings.map((listing, index) => (
+              <motion.div
                 key={listing.id}
-                to={`/detail/${listing.id}`}
-                className="reveal group bg-white rounded-2xl overflow-hidden border border-border hover:shadow-2xl transition-all duration-300 flex flex-col"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                whileHover={{ y: -5 }}
               >
+                <Link
+                  to={`/detail/${listing.id}`}
+                  className="reveal group bg-white rounded-2xl overflow-hidden border border-border hover:shadow-2xl transition-all duration-300 flex flex-col h-full"
+                >
                 {/* Image */}
                 <div className="relative h-56 overflow-hidden">
                   <ImageWithFallback
@@ -180,6 +188,7 @@ export default function PopularListings() {
                   </div>
                 </div>
               </Link>
+              </motion.div>
             ))}
           </div>
         )}

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Search, MapPin, Star, Heart, Fuel, Users, Gauge } from "lucide-react";
@@ -286,7 +287,7 @@ export default function Vehicules() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredVehicles.map((vehicle) => {
+            {filteredVehicles.map((vehicle, index) => {
               const details = parseDetails(vehicle.details);
               const seats = asPositiveNumber(details?.seats);
               const mileage = asPositiveNumber(details?.mileage);
@@ -300,10 +301,17 @@ export default function Vehicules() {
               const plateNumber = asNonEmptyString(details?.plate_number);
               const periodLabel = isCarpool ? null : (vehicle.period ?? t("vehicles.defaultPeriod"));
               return (
-                <Link
+                <motion.div
                   key={vehicle.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  whileHover={{ y: -5 }}
+                >
+                <Link
                   to={`/detail/${vehicle.id}`}
-                  className="group bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col border border-border"
+                  className="group bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col border border-border h-full"
                 >
                   <div className="relative h-60 overflow-hidden">
                     <ImageWithFallback
@@ -388,6 +396,7 @@ export default function Vehicules() {
                     </div>
                   </div>
                 </Link>
+                </motion.div>
               );
             })}
           </div>

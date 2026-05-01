@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Search, MapPin, Star, Heart, Palmtree, Compass, Waves, Mountain, Clock, Users } from "lucide-react";
@@ -275,16 +276,23 @@ export default function Activites() {
           <div className="py-12 text-center text-muted-foreground">{t("activities.empty")}</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredActivities.map((activity) => {
+            {filteredActivities.map((activity, index) => {
               const details = parseDetails(activity.details);
               const duration = asNonEmptyString(details?.duration);
               const level = asNonEmptyString(details?.level);
               const participantsMax = asPositiveNumber(details?.participantsMax);
               return (
-                <Link
+                <motion.div
                   key={activity.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  whileHover={{ y: -5 }}
+                >
+                <Link
                   to={`/detail/${activity.id}`}
-                  className="group bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col border border-border"
+                  className="group bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col border border-border h-full"
                 >
                   <div className="relative h-60 overflow-hidden">
                     <ImageWithFallback
@@ -347,6 +355,7 @@ export default function Activites() {
                     </div>
                   </div>
                 </Link>
+                </motion.div>
               );
             })}
           </div>

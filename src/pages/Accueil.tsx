@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
@@ -108,14 +109,19 @@ export default function Accueil() {
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20 w-full">
-          <div className="text-center mb-8 sm:mb-12">
+          <motion.div 
+            className="text-center mb-8 sm:mb-12"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+          >
             <h1 className="text-4xl sm:text-5xl md:text-6xl mb-4 sm:mb-6 font-bold animate-fade-in-up">
               {t("home.hero.title")}
             </h1>
             <p className="text-lg sm:text-xl text-white/90 max-w-3xl mx-auto animate-fade-in-up animation-delay-200">
               {t("home.hero.subtitle")}
             </p>
-          </div>
+          </motion.div>
 
           <div className="max-w-4xl mx-auto animate-scale-in animation-delay-400">
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "immobilier" | "vehicule" | "activite")} className="w-full">
@@ -274,13 +280,21 @@ export default function Accueil() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-children">
-            {categories.map((cat) => (
-              <Link
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {categories.map((cat, index) => (
+              <motion.div
                 key={cat.id}
-                to={cat.path}
-                className="reveal group relative h-80 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500"
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: index * 0.15 }}
+                whileHover={{ y: -10 }}
+                className="h-full"
               >
+                <Link
+                  to={cat.path}
+                  className="group relative h-full min-h-[320px] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 block w-full"
+                >
                 <ImageWithFallback
                   src={cat.image}
                   alt={cat.title}
@@ -296,7 +310,8 @@ export default function Accueil() {
                   </div>
                   <p className="text-white/80 line-clamp-2 group-hover:text-white/95 transition-colors duration-300">{cat.description}</p>
                 </div>
-              </Link>
+                </Link>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -308,37 +323,64 @@ export default function Accueil() {
       <section className="py-16 bg-gray-50 border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 stagger-children">
-            <div className="reveal flex flex-col items-center text-center p-6 bg-white rounded-2xl shadow-sm border border-border card-hover">
+            <motion.div 
+              className="reveal flex flex-col items-center text-center p-6 bg-white rounded-2xl shadow-sm border border-border card-hover"
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              whileHover={{ y: -5 }}
+            >
               <div className="p-3 bg-primary/10 rounded-2xl mb-4 animate-float" style={{ animationDelay: "0ms" }}>
                 <Shield className="w-8 h-8 text-primary" />
               </div>
               <h3 className="text-xl font-bold mb-2">{t("home.benefit.secure.title")}</h3>
               <p className="text-muted-foreground">{t("home.benefit.secure.description")}</p>
-            </div>
-            <div className="reveal flex flex-col items-center text-center p-6 bg-white rounded-2xl shadow-sm border border-border card-hover">
+            </motion.div>
+            <motion.div 
+              className="reveal flex flex-col items-center text-center p-6 bg-white rounded-2xl shadow-sm border border-border card-hover"
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              whileHover={{ y: -5 }}
+            >
               <div className="p-3 bg-primary/10 rounded-2xl mb-4 animate-float" style={{ animationDelay: "500ms" }}>
                 <Clock className="w-8 h-8 text-primary" />
               </div>
               <h3 className="text-xl font-bold mb-2">{t("home.benefit.support.title")}</h3>
               <p className="text-muted-foreground">{t("home.benefit.support.description")}</p>
-            </div>
-            <div className="reveal flex flex-col items-center text-center p-6 bg-white rounded-2xl shadow-sm border border-border card-hover">
+            </motion.div>
+            <motion.div 
+              className="reveal flex flex-col items-center text-center p-6 bg-white rounded-2xl shadow-sm border border-border card-hover"
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              whileHover={{ y: -5 }}
+            >
               <div className="p-3 bg-primary/10 rounded-2xl mb-4 animate-float" style={{ animationDelay: "1000ms" }}>
                 <TrendingUp className="w-8 h-8 text-primary" />
               </div>
               <h3 className="text-xl font-bold mb-2">{t("home.benefit.price.title")}</h3>
               <p className="text-muted-foreground">{t("home.benefit.price.description")}</p>
-            </div>
+            </motion.div>
           </div>
 
           {shouldShowBecomeHostCta && (
-            <div className="reveal mt-8 rounded-2xl border border-border bg-white p-6 sm:p-8 text-center shadow-sm">
+            <motion.div 
+              className="reveal mt-8 rounded-2xl border border-border bg-white p-6 sm:p-8 text-center shadow-sm"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
               <h3 className="text-xl font-bold mb-2">{t("host.cta.title")}</h3>
               <p className="text-muted-foreground mb-4">{t("host.cta.subtitle")}</p>
               <Button asChild className="rounded-xl bg-primary hover:opacity-90 hover:shadow-md transition-all">
                 <Link to="/devenir-hote">{t("nav.becomeHost")}</Link>
               </Button>
-            </div>
+            </motion.div>
           )}
         </div>
       </section>

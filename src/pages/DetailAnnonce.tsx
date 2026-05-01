@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import type { Locale } from "date-fns";
 import { ar, enUS, fr } from "date-fns/locale";
 import { Link, useParams } from "react-router-dom";
@@ -1132,7 +1133,12 @@ export default function DetailAnnonce() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-background pb-20"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/" className="hover:text-primary">{tr("Accueil")}</Link>
@@ -1783,6 +1789,6 @@ export default function DetailAnnonce() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
