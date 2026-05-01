@@ -3,12 +3,27 @@ import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
-import { Search, Home, Car, Palmtree, MapPin, Calendar, Users, TrendingUp, Shield, Clock } from "lucide-react";
+import { Search, Home, Car, Palmtree, MapPin, Calendar, Users, TrendingUp, Shield, Clock, type LucideIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import PopularListings from "../components/PopularListings";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { ALGERIA_WILAYAS, normalizeWilayaValue } from "../constants/wilayas";
+
+type SearchTab = "immobilier" | "vehicule" | "activite";
+
+type CategoryCard = {
+  id: "immobilier" | "vehicules" | "activites";
+  icon: LucideIcon;
+  title: string;
+  path: string;
+  image: string;
+  description: string;
+};
+
+function isSearchTab(value: string): value is SearchTab {
+  return value === "immobilier" || value === "vehicule" || value === "activite";
+}
 
 // Hook: mark elements with class "reveal" as "visible" when they scroll into view
 function useReveal() {
@@ -30,7 +45,7 @@ function useReveal() {
 }
 
 export default function Accueil() {
-  const [activeTab, setActiveTab] = useState<"immobilier" | "vehicule" | "activite">("immobilier");
+  const [activeTab, setActiveTab] = useState<SearchTab>("immobilier");
   const [destination, setDestination] = useState("");
   const [stayDate, setStayDate] = useState("");
   const [vehiclePeriod, setVehiclePeriod] = useState("");
@@ -43,7 +58,7 @@ export default function Accueil() {
 
   useReveal();
 
-  const categories = [
+  const categories: CategoryCard[] = [
     {
       id: "immobilier",
       icon: Home,
@@ -51,7 +66,6 @@ export default function Accueil() {
       path: "/immobilier",
       image: "https://images.unsplash.com/photo-1618237693938-0fbc85b93774?w=800",
       description: t("home.category.realEstate.description"),
-      gradient: "from-[rgb(153,163,168)] to-[rgb(34,45,49)]",
     },
     {
       id: "vehicules",
@@ -60,7 +74,6 @@ export default function Accueil() {
       path: "/vehicules",
       image: "https://images.unsplash.com/photo-1628468615047-c70ef9e36ad1?w=800",
       description: t("home.category.vehicles.description"),
-      gradient: "from-[rgb(34,45,49)] to-[rgb(153,163,168)]",
     },
     {
       id: "activites",
@@ -69,7 +82,6 @@ export default function Accueil() {
       path: "/activites",
       image: "https://images.unsplash.com/photo-1759069418542-ae707c59d2b8?w=800",
       description: t("home.category.activities.description"),
-      gradient: "from-[rgb(224,190,156)] to-[rgb(96,98,93)]",
     },
   ];
 
@@ -124,7 +136,15 @@ export default function Accueil() {
           </motion.div>
 
           <div className="max-w-4xl mx-auto animate-scale-in animation-delay-400">
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "immobilier" | "vehicule" | "activite")} className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => {
+                if (isSearchTab(value)) {
+                  setActiveTab(value);
+                }
+              }}
+              className="w-full"
+            >
               <TabsList className="w-full grid grid-cols-3 bg-white/95 backdrop-blur-md p-1 rounded-2xl mb-4 shadow-lg">
                 <TabsTrigger
                   value="immobilier"
