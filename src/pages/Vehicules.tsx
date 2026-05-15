@@ -55,14 +55,14 @@ function formatOptionalIsoDate(value: string | null, locale: string): string | n
   return new Date(year, month - 1, day).toLocaleDateString(locale);
 }
 
-type VehicleTab = "location" | "covoiturage";
+type VehicleTab = "tous" | "location" | "covoiturage";
 
 function normalizeVehicleCategory(value: string | null | undefined): string {
   return normalizeText((value ?? "").trim());
 }
 
 export default function Vehicules() {
-  const [activeTab, setActiveTab] = useState<VehicleTab>("location");
+  const [activeTab, setActiveTab] = useState<VehicleTab>("tous");
   const [locationFilter, setLocationFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
   const [appliedLocationFilter, setAppliedLocationFilter] = useState("all");
@@ -73,6 +73,12 @@ export default function Vehicules() {
   const { token } = useAuth();
   const { t, locale } = useLanguage();
   const location = useLocation();
+
+  const vehicleTypes = [
+    { id: "tous", label: t("vehicles.tab.allTypes") },
+    { id: "location", label: t("vehicles.tab.rental") },
+    { id: "covoiturage", label: t("vehicles.tab.carpool") },
+  ] as const;
 
   useEffect(() => {
     let mounted = true;
@@ -162,6 +168,9 @@ export default function Vehicules() {
   const filteredVehicles = useMemo(() => {
     const byTab = listings.filter((vehicle) => {
       const category = normalizeVehicleCategory(vehicle.category);
+      if (activeTab === "tous") {
+        return category === "" || category === "location" || category === "covoiturage";
+      }
       if (activeTab === "covoiturage") {
         return category === "covoiturage";
       }
@@ -215,20 +224,17 @@ export default function Vehicules() {
             </p>
           </div>
 
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as VehicleTab)} className="w-full max-w-2xl mx-auto">
-            <TabsList className="w-full grid grid-cols-2 bg-white/95 backdrop-blur-md p-1 rounded-2xl shadow-lg">
-              <TabsTrigger
-                value="location"
-                className="rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white transition-all"
-              >
-                {t("vehicles.tab.rental")}
-              </TabsTrigger>
-              <TabsTrigger
-                value="covoiturage"
-                className="rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white transition-all"
-              >
-                {t("vehicles.tab.carpool")}
-              </TabsTrigger>
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as VehicleTab)} className="w-full max-w-4xl mx-auto">
+            <TabsList className="w-full bg-white/95 backdrop-blur-md p-1 rounded-2xl shadow-lg flex gap-1 overflow-x-auto justify-start">
+              {vehicleTypes.map((type) => (
+                <TabsTrigger
+                  key={type.id}
+                  value={type.id}
+                  className="rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white transition-all whitespace-nowrap px-4"
+                >
+                  {type.label}
+                </TabsTrigger>
+              ))}
             </TabsList>
           </Tabs>
         </div>
@@ -282,7 +288,9 @@ export default function Vehicules() {
           <div className="py-12 text-center text-muted-foreground">{t("vehicles.loading")}</div>
         ) : filteredVehicles.length === 0 ? (
           <div className="py-12 text-center text-muted-foreground">
-            {activeTab === "covoiturage"
+            {activeTab === "tous"
+              ? t("vehicles.empty")
+              : activeTab === "covoiturage"
               ? t("vehicles.emptyCarpool")
               : t("vehicles.emptyRental")}
           </div>

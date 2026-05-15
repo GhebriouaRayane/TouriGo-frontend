@@ -182,6 +182,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     "vehicles.pageTitle": "🚗 Véhicules",
     "vehicles.pageSubtitle": "Louez ou partagez un trajet en toute simplicité",
+    "vehicles.tab.allTypes": "Tous les types",
     "vehicles.tab.rental": "Location",
     "vehicles.tab.carpool": "Covoiturage",
     "vehicles.placePlaceholder": "Lieu",
@@ -190,6 +191,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "vehicles.available": "{count} véhicules disponibles",
     "vehicles.filters": "Filtres",
     "vehicles.loading": "Chargement des véhicules...",
+    "vehicles.empty": "Aucun véhicule trouvé avec ces filtres.",
     "vehicles.emptyCarpool": "Aucun trajet de covoiturage disponible avec ces filtres.",
     "vehicles.emptyRental": "Aucun véhicule de location trouvé avec ces filtres.",
     "vehicles.favoriteAria": "Ajouter aux favoris",
@@ -476,6 +478,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     "vehicles.pageTitle": "🚗 Vehicles",
     "vehicles.pageSubtitle": "Rent or share a ride with ease",
+    "vehicles.tab.allTypes": "All types",
     "vehicles.tab.rental": "Rental",
     "vehicles.tab.carpool": "Carpool",
     "vehicles.placePlaceholder": "Location",
@@ -484,6 +487,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "vehicles.available": "{count} vehicles available",
     "vehicles.filters": "Filters",
     "vehicles.loading": "Loading vehicles...",
+    "vehicles.empty": "No vehicles found with these filters.",
     "vehicles.emptyCarpool": "No carpool rides available with these filters.",
     "vehicles.emptyRental": "No rental vehicles found with these filters.",
     "vehicles.favoriteAria": "Add to favorites",
@@ -770,6 +774,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     "vehicles.pageTitle": "🚗 المركبات",
     "vehicles.pageSubtitle": "استأجر أو شارك رحلة بسهولة",
+    "vehicles.tab.allTypes": "كل الأنواع",
     "vehicles.tab.rental": "تأجير",
     "vehicles.tab.carpool": "مشاركة الركوب",
     "vehicles.placePlaceholder": "المكان",
@@ -778,6 +783,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "vehicles.available": "{count} مركبة متاحة",
     "vehicles.filters": "فلاتر",
     "vehicles.loading": "جارٍ تحميل المركبات...",
+    "vehicles.empty": "لم يتم العثور على مركبات بهذه الفلاتر.",
     "vehicles.emptyCarpool": "لا توجد رحلات مشاركة ركوب بهذه الفلاتر.",
     "vehicles.emptyRental": "لم يتم العثور على مركبات للإيجار بهذه الفلاتر.",
     "vehicles.favoriteAria": "إضافة إلى المفضلة",
