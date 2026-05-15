@@ -314,6 +314,8 @@ export type ApiNotification = {
   created_at: string;
 };
 
+export type PushPlatform = "android" | "ios" | "web";
+
 export type ApiMessage = {
   id: number;
   booking_id: number;
@@ -700,6 +702,35 @@ export function markAllNotificationsReadApi(token: string) {
   return request<{ updated: number }>("/notifications/read-all", {
     method: "POST",
     token,
+  });
+}
+
+export function registerPushTokenApi(
+  token: string,
+  payload: { token: string; platform: PushPlatform; device_id?: string }
+) {
+  return request<{
+    id: number;
+    user_id: number;
+    token: string;
+    platform: PushPlatform;
+    device_id: string | null;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+    last_seen_at: string;
+  }>("/push-tokens/register", {
+    method: "POST",
+    token,
+    body: payload,
+  });
+}
+
+export function unregisterPushTokenApi(token: string, pushToken: string) {
+  return request<{ message: string }>("/push-tokens/unregister", {
+    method: "DELETE",
+    token,
+    body: { token: pushToken },
   });
 }
 

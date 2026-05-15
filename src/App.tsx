@@ -3,6 +3,7 @@ import { Capacitor, PluginListenerHandle, registerPlugin } from "@capacitor/core
 import { BrowserRouter as Router, Link, Navigate, Route, Routes, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { Toaster } from "sonner";
 
 // Removed old PageTransition
 import ChatBot from "./components/ChatBot";
@@ -220,6 +221,7 @@ export default function App() {
         </main>
         <FooterNew />
         <ChatBot />
+        <Toaster position="top-right" richColors closeButton />
       </div>
     </Router>
   );

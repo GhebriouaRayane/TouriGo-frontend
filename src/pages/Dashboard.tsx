@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -11,6 +11,7 @@ import type { DateRange } from "react-day-picker";
 import { ar, enUS, fr } from "date-fns/locale";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
+import { useNotificationCenter } from "../context/NotificationCenterContext";
 import {
   ApiBooking,
   ApiListing,
@@ -26,7 +27,6 @@ import {
   getFavoriteListingsApi,
   getMyBookingsApi,
   getMyListingsApi,
-  getNotificationsApi,
   getReceivedBookingsApi,
   markAllNotificationsReadApi,
   markNotificationReadApi,
@@ -742,7 +742,6 @@ export default function Dashboard() {
   const [favoriteListings, setFavoriteListings] = useState<ApiListing[]>([]);
   const [myBookings, setMyBookings] = useState<ApiBooking[]>([]);
   const [hostBookings, setHostBookings] = useState<ApiBooking[]>([]);
-  const [notifications, setNotifications] = useState<ApiNotification[]>([]);
   const [bookingMessages, setBookingMessages] = useState<ApiMessage[]>([]);
   const [selectedConversationBookingId, setSelectedConversationBookingId] = useState<number | null>(null);
   const [messagesView, setMessagesView] = useState<"notifications" | "messages">("messages");
@@ -751,7 +750,6 @@ export default function Dashboard() {
   const [loadingFavorites, setLoadingFavorites] = useState(true);
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [loadingHostBookings, setLoadingHostBookings] = useState(true);
-  const [loadingNotifications, setLoadingNotifications] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
@@ -783,6 +781,7 @@ export default function Dashboard() {
     availability_dates: "",
   });
   const { user, token, refreshMe, logout } = useAuth();
+  const { notifications, loadingNotifications, unreadNotificationsCount, refreshNotifications } = useNotificationCenter();
 
   const [profileForm, setProfileForm] = useState({
     email: "",
@@ -958,37 +957,6 @@ export default function Dashboard() {
     };
   }, [token]);
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      if (!token) {
-        if (mounted) {
-          setNotifications([]);
-          setLoadingNotifications(false);
-        }
-        return;
-      }
-      setLoadingNotifications(true);
-      try {
-        const data = await getNotificationsApi(token, 100);
-        if (mounted) {
-          setNotifications(data);
-        }
-      } catch {
-        if (mounted) {
-          setNotifications([]);
-        }
-      } finally {
-        if (mounted) {
-          setLoadingNotifications(false);
-        }
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [token]);
-
   const conversationBookings = useMemo(() => {
     const byId = new Map<number, ApiBooking>();
     [...myBookings, ...hostBookings].forEach((booking) => {
@@ -1065,12 +1033,8 @@ export default function Dashboard() {
     const intervalId = window.setInterval(() => {
       void (async () => {
         try {
-          const [bookings, freshNotifications] = await Promise.all([
-            getMyBookingsApi(token),
-            getNotificationsApi(token, 100),
-          ]);
+          const bookings = await getMyBookingsApi(token);
           setMyBookings(bookings);
-          setNotifications(freshNotifications);
           if (isHost) {
             const received = await getReceivedBookingsApi(token);
             setHostBookings(received);
@@ -1108,11 +1072,6 @@ export default function Dashboard() {
     if (statusValue === "rejected" || statusValue === "cancelled") return "bg-red-100 text-red-700";
     return "bg-slate-100 text-slate-700";
   };
-
-  const unreadNotificationsCount = useMemo(
-    () => notifications.filter((notification) => !notification.is_read).length,
-    [notifications]
-  );
 
   const unreadMessageNotificationsCount = useMemo(
     () => notifications.filter((notification) => !notification.is_read && notification.type === "message").length,
@@ -1977,8 +1936,7 @@ export default function Dashboard() {
       const updatedBooking = await confirmBookingApi(token, bookingId);
       applyBookingUpdate(updatedBooking);
       setBookingActionMessage(tr("Reservation confirmee."));
-      const freshNotifications = await getNotificationsApi(token, 100);
-      setNotifications(freshNotifications);
+      await refreshNotifications();
     } catch (error) {
       setBookingActionMessage(error instanceof Error ? error.message : tr("Erreur lors de la confirmation."));
     }
@@ -1994,8 +1952,7 @@ export default function Dashboard() {
       const updatedBooking = await cancelBookingApi(token, bookingId);
       applyBookingUpdate(updatedBooking);
       setBookingActionMessage(tr("Reservation annulee."));
-      const freshNotifications = await getNotificationsApi(token, 100);
-      setNotifications(freshNotifications);
+      await refreshNotifications();
     } catch (error) {
       setBookingActionMessage(error instanceof Error ? error.message : tr("Erreur lors de l'annulation."));
     } finally {
@@ -2013,40 +1970,35 @@ export default function Dashboard() {
       const updatedBooking = await rejectBookingApi(token, bookingId, reason.trim() || undefined);
       applyBookingUpdate(updatedBooking);
       setBookingActionMessage(tr("Reservation refusee."));
-      const freshNotifications = await getNotificationsApi(token, 100);
-      setNotifications(freshNotifications);
+      await refreshNotifications();
     } catch (error) {
       setBookingActionMessage(error instanceof Error ? error.message : tr("Erreur lors du refus."));
     }
   };
 
-  const onMarkNotificationRead = async (notificationId: number) => {
+  const onMarkNotificationRead = useCallback(async (notificationId: number) => {
     if (!token) {
       return;
     }
     try {
-      const updated = await markNotificationReadApi(token, notificationId);
-      setNotifications((current) =>
-        current.map((notification) => (notification.id === updated.id ? updated : notification))
-      );
+      await markNotificationReadApi(token, notificationId);
+      await refreshNotifications();
     } catch {
-      // Keep local state unchanged on API failure.
+      // Ignore notification mark-as-read errors in UI.
     }
-  };
+  }, [refreshNotifications, token]);
 
-  const onMarkAllNotificationsRead = async () => {
+  const onMarkAllNotificationsRead = useCallback(async () => {
     if (!token) {
       return;
     }
     try {
       await markAllNotificationsReadApi(token);
-      setNotifications((current) =>
-        current.map((notification) => ({ ...notification, is_read: true }))
-      );
+      await refreshNotifications();
     } catch {
-      // Keep local state unchanged on API failure.
+      // Ignore bulk mark-as-read errors in UI.
     }
-  };
+  }, [refreshNotifications, token]);
 
   const onSendMessage = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -2065,8 +2017,7 @@ export default function Dashboard() {
       setBookingMessages((current) => [...current, sent]);
       setMessageDraft("");
       setMessageActionMessage(tr("Message envoye."));
-      const freshNotifications = await getNotificationsApi(token, 100);
-      setNotifications(freshNotifications);
+      await refreshNotifications();
     } catch (error) {
       setMessageActionMessage(error instanceof Error ? error.message : tr("Erreur lors de l'envoi du message."));
     } finally {
