@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { addFavoriteApi, ApiListing, getFavoriteIdsApi, getListingsApi, removeFavoriteApi } from "../lib/api";
+import { formatListingRating } from "../lib/listingRatings";
 import { useLanguage } from "../context/LanguageContext";
 import { ALGERIA_WILAYAS, matchesWilaya, normalizeText, normalizeWilayaValue } from "../constants/wilayas";
 
@@ -342,9 +343,7 @@ export default function Activites() {
                     <div className="flex items-center justify-between pt-4 border-t border-border mt-auto">
                       <div className="flex items-center gap-1">
                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-bold">
-                          4.8 <span className="text-muted-foreground font-normal text-sm">({t("common.notAvailable")})</span>
-                        </span>
+                        <span className="font-bold">{formatListingRating(activity, t("common.notAvailable"))}</span>
                       </div>
                       <div className="text-right">
                         <p className="text-xl font-bold text-foreground">

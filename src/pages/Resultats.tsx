@@ -7,6 +7,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { addFavoriteApi, ApiListing, getFavoriteIdsApi, getListingsApi, removeFavoriteApi } from "../lib/api";
+import { compareListingsByRating, formatListingRating } from "../lib/listingRatings";
 import { matchesWilaya, normalizeText, normalizeWilayaValue } from "../constants/wilayas";
 
 function parseListingTypeFilter(value: string | null): ApiListing["type"] | null {
@@ -137,6 +138,8 @@ export default function Resultats() {
       data = [...data].sort((a, b) => a.price - b.price);
     } else if (sortBy === "price-desc") {
       data = [...data].sort((a, b) => b.price - a.price);
+    } else if (sortBy === "rating") {
+      data = [...data].sort(compareListingsByRating);
     }
     return data;
   }, [destinationFilter, listings, search, sortBy, typeFilter]);
@@ -255,7 +258,7 @@ export default function Resultats() {
                       <div className="flex items-center gap-1">
                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                         <span className="text-sm font-medium">
-                          4.8 <span className="text-muted-foreground font-normal">({t("common.notAvailable")})</span>
+                          {formatListingRating(result, t("common.notAvailable"))}
                         </span>
                       </div>
                       <div className="text-right">

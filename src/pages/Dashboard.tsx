@@ -37,6 +37,7 @@ import {
   updateListingApi,
   updateMeApi,
 } from "../lib/api";
+import { formatListingRating } from "../lib/listingRatings";
 import { makeTranslator } from "../i18n/localize";
 import { Bell, Calendar, Check, Heart, MapPin, MessageCircle, Plus, SendHorizontal, Settings, Star, X } from "lucide-react";
 
@@ -2935,7 +2936,7 @@ export default function Dashboard() {
                               <span className="text-lg font-bold">{formatDza(listing.price)}</span>
                               <div className="flex items-center gap-1">
                                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                <span className="font-medium">{tr("N/A")}</span>
+                                <span className="font-medium">{formatListingRating(listing, tr("N/A"))}</span>
                               </div>
                             </div>
                             <div className="flex gap-4 text-sm text-muted-foreground pt-4 border-t border-border">

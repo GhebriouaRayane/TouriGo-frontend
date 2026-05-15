@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { addFavoriteApi, ApiListing, getFavoriteIdsApi, getListingsApi, removeFavoriteApi } from "../lib/api";
+import { formatListingRating } from "../lib/listingRatings";
 import { useLanguage } from "../context/LanguageContext";
 import { ALGERIA_WILAYAS, matchesWilaya, normalizeText, normalizeWilayaValue } from "../constants/wilayas";
 
@@ -302,9 +303,7 @@ export default function Immobilier() {
                   <div className="flex items-center justify-between pt-3 border-t border-border mt-auto">
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">
-                        4.8 <span className="text-muted-foreground font-normal">({t("common.notAvailable")})</span>
-                      </span>
+                      <span className="text-sm font-medium">{formatListingRating(property, t("common.notAvailable"))}</span>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-foreground">

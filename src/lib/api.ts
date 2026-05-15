@@ -159,6 +159,8 @@ export type ApiListing = {
   owner_id: number | null;
   owner_full_name: string | null;
   owner_phone_number: string | null;
+  rating_average: number | null;
+  rating_count: number;
   images: ApiImage[];
 };
 
