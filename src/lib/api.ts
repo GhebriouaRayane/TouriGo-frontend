@@ -62,6 +62,16 @@ export const API_ORIGIN = (() => {
 })();
 
 const LOCAL_API_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i;
+const LISTINGS_CACHE_TTL_MS = 5 * 60 * 1000;
+const LISTINGS_CACHE_PREFIX = "tourigo:listings:";
+
+type ListingsCacheEntry = {
+  data: ApiListing[];
+  expiresAt: number;
+};
+
+const listingsMemoryCache = new Map<string, ListingsCacheEntry>();
+const listingsInFlight = new Map<string, Promise<ApiListing[]>>();
 
 function normalizeMediaUrl(url: string): string {
   const trimmed = url.trim();
@@ -93,6 +103,74 @@ function normalizeListing(listing: ApiListing): ApiListing {
       url: normalizeMediaUrl(image.url),
     })),
   };
+}
+
+function buildListingsQuery(params: Record<string, string | number | undefined>) {
+  const query = new URLSearchParams();
+  Object.entries(params)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .forEach(([key, value]) => {
+      if (value !== undefined && value !== "") {
+        query.append(key, String(value));
+      }
+    });
+  return query.toString();
+}
+
+function getListingsCacheKey(query: string) {
+  return `${LISTINGS_CACHE_PREFIX}${query}`;
+}
+
+function readListingsSessionCache(query: string): ApiListing[] | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    const rawValue = window.sessionStorage.getItem(getListingsCacheKey(query));
+    if (!rawValue) {
+      return null;
+    }
+    const parsed = JSON.parse(rawValue) as ListingsCacheEntry;
+    if (!parsed?.expiresAt || parsed.expiresAt <= Date.now() || !Array.isArray(parsed.data)) {
+      window.sessionStorage.removeItem(getListingsCacheKey(query));
+      return null;
+    }
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+function writeListingsCache(query: string, data: ApiListing[]) {
+  const entry = {
+    data,
+    expiresAt: Date.now() + LISTINGS_CACHE_TTL_MS,
+  };
+  listingsMemoryCache.set(query, entry);
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.sessionStorage.setItem(getListingsCacheKey(query), JSON.stringify(entry));
+  } catch {
+    // Ignore storage quota / privacy mode issues.
+  }
+}
+
+function readListingsCache(query: string): ApiListing[] | null {
+  const memoryEntry = listingsMemoryCache.get(query);
+  if (memoryEntry && memoryEntry.expiresAt > Date.now()) {
+    return memoryEntry.data;
+  }
+  if (memoryEntry) {
+    listingsMemoryCache.delete(query);
+  }
+  const sessionData = readListingsSessionCache(query);
+  if (sessionData) {
+    writeListingsCache(query, sessionData);
+    return sessionData;
+  }
+  return null;
 }
 
 function normalizeUser(user: ApiUser): ApiUser {
@@ -383,16 +461,40 @@ export function becomeHostApi(token: string) {
   }).then(normalizeUser);
 }
 
-export function getListingsApi(params: Record<string, string | number | undefined>) {
-  const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== "") {
-      query.append(key, String(value));
+export function getListingsApi(
+  params: Record<string, string | number | undefined>,
+  options?: { forceRefresh?: boolean }
+) {
+  const query = buildListingsQuery(params);
+  if (!options?.forceRefresh) {
+    const cached = readListingsCache(query);
+    if (cached) {
+      return Promise.resolve(cached);
     }
+    const inFlight = listingsInFlight.get(query);
+    if (inFlight) {
+      return inFlight;
+    }
+  }
+
+  const promise = request<ApiListing[]>(`/listings/?${query}`).then((listings) => {
+    const normalizedListings = listings.map(normalizeListing);
+    writeListingsCache(query, normalizedListings);
+    return normalizedListings;
+  }).finally(() => {
+    listingsInFlight.delete(query);
   });
-  return request<ApiListing[]>(`/listings/?${query.toString()}`).then((listings) =>
-    listings.map(normalizeListing)
-  );
+
+  listingsInFlight.set(query, promise);
+  return promise;
+}
+
+export function prefetchListingsApi(params: Record<string, string | number | undefined>) {
+  return getListingsApi(params).then(() => undefined).catch(() => undefined);
+}
+
+export function warmupApi() {
+  return prefetchListingsApi({ limit: 1 });
 }
 
 export function getListingByIdApi(id: number) {

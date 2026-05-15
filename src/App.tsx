@@ -11,6 +11,7 @@ import NavbarNew from "./components/NavbarNew";
 import { useAuth } from "./context/AuthContext";
 import { useLanguage } from "./context/LanguageContext";
 import { loadGoogleIdentityScript } from "./lib/googleIdentity";
+import { prefetchListingsApi, warmupApi } from "./lib/api";
 import Accueil from "./pages/Accueil";
 import Activites from "./pages/Activites";
 import Dashboard from "./pages/Dashboard";
@@ -197,6 +198,12 @@ export default function App() {
     document.documentElement.style.colorScheme = theme;
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
+
+  useEffect(() => {
+    void warmupApi();
+    void prefetchListingsApi({ limit: 8 });
+    void prefetchListingsApi({ type: "immobilier", limit: 100 });
+  }, []);
 
   const onToggleTheme = () => {
     setTheme((previousTheme) => (previousTheme === "dark" ? "light" : "dark"));
