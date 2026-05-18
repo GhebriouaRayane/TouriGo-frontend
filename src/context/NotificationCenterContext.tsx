@@ -8,6 +8,7 @@ import {
   unregisterPushTokenApi,
 } from "../lib/api";
 import {
+  getNativePushConfigurationStatus,
   PushNotifications,
   getOrCreatePushDeviceId,
   getPushPlatform,
@@ -146,6 +147,15 @@ export function NotificationCenterProvider({ children }: { children: React.React
 
     const initializeNativePushNotifications = async () => {
       try {
+        const nativePushStatus = await getNativePushConfigurationStatus();
+        if (!nativePushStatus.configured) {
+          console.warn(
+            "Native push notifications are not configured on this Android build.",
+            nativePushStatus.error ?? "Missing google-services configuration."
+          );
+          return;
+        }
+
         const permissionStatus = await PushNotifications.checkPermissions();
         const resolvedPermission =
           permissionStatus.receive === "prompt"

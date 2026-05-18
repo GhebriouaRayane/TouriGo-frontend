@@ -39,6 +39,13 @@ type PushNotificationsPlugin = {
 };
 
 export const PushNotifications = registerPlugin<PushNotificationsPlugin>("PushNotifications");
+const PushDiagnostics = registerPlugin<{
+  getStatus: () => Promise<{
+    configured?: boolean;
+    initialized?: boolean;
+    error?: string;
+  }>;
+}>("PushDiagnostics");
 
 const PUSH_DEVICE_ID_STORAGE_KEY = "tourigo-push-device-id";
 
@@ -70,6 +77,38 @@ export function getOrCreatePushDeviceId() {
       : `push-${Date.now()}-${Math.round(Math.random() * 1_000_000)}`;
   window.localStorage.setItem(PUSH_DEVICE_ID_STORAGE_KEY, nextId);
   return nextId;
+}
+
+export async function getNativePushConfigurationStatus() {
+  if (!isNativePushPlatform()) {
+    return {
+      configured: false,
+      initialized: false,
+      error: "Push natif indisponible sur cette plateforme.",
+    };
+  }
+
+  if (Capacitor.getPlatform() !== "android") {
+    return {
+      configured: true,
+      initialized: true,
+    };
+  }
+
+  try {
+    const status = await PushDiagnostics.getStatus();
+    return {
+      configured: Boolean(status.configured),
+      initialized: Boolean(status.initialized),
+      error: status.error,
+    };
+  } catch (error) {
+    return {
+      configured: false,
+      initialized: false,
+      error: error instanceof Error ? error.message : "Diagnostic push Android indisponible.",
+    };
+  }
 }
 
 export type NativePushListenerCallbacks = {
