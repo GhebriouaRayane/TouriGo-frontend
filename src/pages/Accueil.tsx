@@ -9,6 +9,7 @@ import PopularListings from "../components/PopularListings";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { ALGERIA_WILAYAS, normalizeWilayaValue } from "../constants/wilayas";
+import principalImage from "../assets/images/principal.jpg";
 
 type SearchTab = "immobilier" | "vehicule" | "activite";
 
@@ -113,7 +114,7 @@ export default function Accueil() {
       <section className="relative text-white overflow-hidden min-h-[600px] flex items-center">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1622104547694-574ff6207fe6?w=1600"
+            src={principalImage}
             alt="Algerian Mediterranean Coast"
             className="w-full h-full object-cover"
           />

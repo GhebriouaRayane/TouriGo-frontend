@@ -11,6 +11,7 @@ import { addFavoriteApi, ApiListing, getFavoriteIdsApi, getListingsApi, removeFa
 import { formatListingRating } from "../lib/listingRatings";
 import { useLanguage } from "../context/LanguageContext";
 import { ALGERIA_WILAYAS, matchesWilaya, normalizeText, normalizeWilayaValue } from "../constants/wilayas";
+import immobilierImage from "../assets/images/immobilier.jpg";
 
 type RealEstateTab = "tous" | "appartement" | "maison" | "studio" | "hotel" | "cabanon";
 
@@ -164,7 +165,7 @@ export default function Immobilier() {
       <section className="relative text-white py-12 sm:py-16 overflow-hidden">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600"
+            src={immobilierImage}
             alt="Ville et immobilier"
             className="w-full h-full object-cover"
           />

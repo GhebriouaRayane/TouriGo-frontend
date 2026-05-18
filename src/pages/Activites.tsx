@@ -11,6 +11,7 @@ import { addFavoriteApi, ApiListing, getFavoriteIdsApi, getListingsApi, removeFa
 import { formatListingRating } from "../lib/listingRatings";
 import { useLanguage } from "../context/LanguageContext";
 import { ALGERIA_WILAYAS, matchesWilaya, normalizeText, normalizeWilayaValue } from "../constants/wilayas";
+import activitesImage from "../assets/images/activites.jpg";
 
 function parseDetails(details: string | null): Record<string, unknown> | null {
   if (!details) {
@@ -198,7 +199,7 @@ export default function Activites() {
       <section className="relative text-white py-12 sm:py-16 overflow-hidden">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1521336575822-6da63fb45455?w=1600"
+            src={activitesImage}
             alt="Activités en plein air"
             className="w-full h-full object-cover"
           />
