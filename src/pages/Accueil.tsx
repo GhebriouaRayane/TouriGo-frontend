@@ -10,33 +10,6 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { ALGERIA_WILAYAS, normalizeWilayaValue } from "../constants/wilayas";
 
-
-
-
-
-
-
-
-import immobilierImg from "../assets/images/immobilier.jpg";
-import vehiculesImg from "../assets/images/vehicules.jpg";
-import activitesImg from "../assets/images/activites.jpg";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 type SearchTab = "immobilier" | "vehicule" | "activite";
 
 type CategoryCard = {
@@ -91,7 +64,7 @@ export default function Accueil() {
       icon: Home,
       title: t("home.category.realEstate.title"),
       path: "/immobilier",
-      image: "immobilierImg",
+      image: "https://images.unsplash.com/photo-1618237693938-0fbc85b93774?w=800",
       description: t("home.category.realEstate.description"),
     },
     {
@@ -107,7 +80,7 @@ export default function Accueil() {
       icon: Palmtree,
       title: t("home.category.activities.title"),
       path: "/activites",
-      image: "activitesImg",
+      image: "https://images.unsplash.com/photo-1759069418542-ae707c59d2b8?w=800",
       description: t("home.category.activities.description"),
     },
   ];
