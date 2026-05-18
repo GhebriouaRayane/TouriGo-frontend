@@ -11,6 +11,7 @@ import { addFavoriteApi, ApiListing, getFavoriteIdsApi, getListingsApi, removeFa
 import { formatListingRating } from "../lib/listingRatings";
 import { useLanguage } from "../context/LanguageContext";
 import { ALGERIA_WILAYAS, matchesWilaya, normalizeText, normalizeWilayaValue } from "../constants/wilayas";
+import vehiculesImage from "../assets/images/vehicules.jpg";
 
 function parseDetails(details: string | null): Record<string, unknown> | null {
   if (!details) {
@@ -210,7 +211,7 @@ export default function Vehicules() {
       <section className="relative text-white py-12 sm:py-16 overflow-hidden">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1600"
+            src={vehiculesImage}
             alt="Véhicules sur la route"
             className="w-full h-full object-cover"
           />

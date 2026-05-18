@@ -5,6 +5,9 @@ import { Home, Car, Palmtree, TrendingUp, Shield, Users, CheckCircle, ArrowRight
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
+import image1 from "../assets/images/1.jpg";
+import image2 from "../assets/images/2.jpg";
+import image3 from "../assets/images/3.jpg";
 
 export default function DevenirHote() {
   const navigate = useNavigate();
@@ -109,7 +112,7 @@ export default function DevenirHote() {
       <section className="relative text-white overflow-hidden py-16 sm:py-24">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=1600"
+            src={image1}
             alt="Paysage pour devenir hote"
             className="w-full h-full object-cover"
           />
@@ -209,7 +212,7 @@ export default function DevenirHote() {
       <section className="relative py-16 sm:py-20 border-y border-border overflow-hidden">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1600"
+            src={image2}
             alt="Paysage Algérie"
             className="w-full h-full object-cover"
           />
@@ -253,7 +256,7 @@ export default function DevenirHote() {
       <section className="relative py-20 text-white text-center overflow-hidden">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1600"
+            src={image3}
             alt="Maison confortable"
             className="w-full h-full object-cover"
           />
