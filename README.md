@@ -1,11 +1,28 @@
+# Frontend
 
-  # Elegant Navigation Bar Design
+## Running the code
 
-  This is a code bundle for Elegant Navigation Bar Design. The original project is available at https://www.figma.com/design/VYCdfUeWRW8tC4uobEZOIR/Elegant-Navigation-Bar-Design.
+Run `npm i` to install the dependencies.
 
-  ## Running the code
+Run `npm run dev` to start the development server.
 
-  Run `npm i` to install the dependencies.
+## Firebase Notifications
 
-  Run `npm run dev` to start the development server.
+Firebase is used only for native mobile push notifications.
+
+Android:
+
+Place your Firebase config file here:
+
+`frontend/android/app/google-services.json`
+
+Backend:
+
+Place your Firebase Admin service account file here:
+
+`backend/firebase-service-account.json`
+
+Then set this variable in `backend/.env`:
+
+`FIREBASE_SERVICE_ACCOUNT_FILE=./firebase-service-account.json`
   
