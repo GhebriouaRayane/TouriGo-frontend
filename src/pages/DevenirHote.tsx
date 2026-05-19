@@ -8,6 +8,9 @@ import { useLanguage } from "../context/LanguageContext";
 import image1 from "../assets/images/1.jpg";
 import image2 from "../assets/images/2.jpg";
 import image3 from "../assets/images/3.jpg";
+import principale3Image from "../assets/images/principale3.jpg";
+import principale2Image from "../assets/images/principale2.jpg";
+import principale1Image from "../assets/images/principale1.jpg";
 
 export default function DevenirHote() {
   const navigate = useNavigate();
@@ -46,7 +49,7 @@ export default function DevenirHote() {
       id: "immobilier",
       icon: Home,
       title: t("host.type.realEstate.title"),
-      image: "https://images.unsplash.com/photo-1618237693938-0fbc85b93774?w=800",
+      image: principale1Image,
       description: t("host.type.realEstate.description"),
       gradient: "from-[#00A6A6] to-[#004E64]",
       benefits: [
@@ -59,7 +62,7 @@ export default function DevenirHote() {
       id: "vehicule",
       icon: Car,
       title: t("host.type.vehicle.title"),
-      image: "https://images.unsplash.com/photo-1715260927356-9402f78e5032?w=800",
+      image: principale2Image,
       description: t("host.type.vehicle.description"),
       gradient: "from-[#004E64] to-[#FF9E57]",
       benefits: [
@@ -72,7 +75,7 @@ export default function DevenirHote() {
       id: "activite",
       icon: Palmtree,
       title: t("host.type.activity.title"),
-      image: "https://images.unsplash.com/photo-1759069418542-ae707c59d2b8?w=800",
+      image: principale3Image,
       description: t("host.type.activity.description"),
       gradient: "from-[#FFD9A0] to-[#00A6A6]",
       benefits: [

@@ -10,6 +10,8 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { ALGERIA_WILAYAS, normalizeWilayaValue } from "../constants/wilayas";
 import principalImage from "../assets/images/principal.jpg";
+import principale1Image from "../assets/images/principale1.jpg";
+import principale2Image from "../assets/images/principale2.jpg";
 import principale3Image from "../assets/images/principale3.jpg";
 
 type SearchTab = "immobilier" | "vehicule" | "activite";
@@ -66,7 +68,7 @@ export default function Accueil() {
       icon: Home,
       title: t("home.category.realEstate.title"),
       path: "/immobilier",
-      image: "https://images.unsplash.com/photo-1618237693938-0fbc85b93774?w=800",
+      image: principale1Image,
       description: t("home.category.realEstate.description"),
     },
     {
@@ -74,7 +76,7 @@ export default function Accueil() {
       icon: Car,
       title: t("home.category.vehicles.title"),
       path: "/vehicules",
-      image: "https://images.unsplash.com/photo-1628468615047-c70ef9e36ad1?w=800",
+      image: principale2Image,
       description: t("home.category.vehicles.description"),
     },
     {
