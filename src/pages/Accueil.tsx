@@ -10,6 +10,7 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { ALGERIA_WILAYAS, normalizeWilayaValue } from "../constants/wilayas";
 import principalImage from "../assets/images/principal.jpg";
+import principale3Image from "../assets/images/principale3.jpg";
 
 type SearchTab = "immobilier" | "vehicule" | "activite";
 
@@ -81,7 +82,7 @@ export default function Accueil() {
       icon: Palmtree,
       title: t("home.category.activities.title"),
       path: "/activites",
-      image: "https://images.unsplash.com/photo-1759069418542-ae707c59d2b8?w=800",
+      image: principale3Image,
       description: t("home.category.activities.description"),
     },
   ];
