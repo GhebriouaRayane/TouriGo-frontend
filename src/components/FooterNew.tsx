@@ -1,10 +1,15 @@
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
-import logo from "../assets/9a08edf2d1705a725f9124e56803bea1d0396d59.jpg";
+import logoLight from "../assets/logo-light.png";
+import logoDark from "../assets/logo-dark.png";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 
-export default function FooterNew() {
+type FooterNewProps = {
+  theme?: "light" | "dark";
+};
+
+export default function FooterNew({ theme }: FooterNewProps) {
   const { user } = useAuth();
   const { t } = useLanguage();
   const isHost = user?.role === "host" || user?.role === "admin";
@@ -41,13 +46,13 @@ export default function FooterNew() {
     : footerSections.hosting;
 
   return (
-    <footer className="bg-gradient-to-b from-white to-background border-t border-border">
+    <footer className="bg-gradient-to-b from-white to-background dark:from-background dark:to-background border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
             <Link to="/">
               <img
-                src={logo}
+                src={theme === "dark" ? logoDark : logoLight}
                 alt="TouriGo Logo"
                 className="h-14 w-auto mb-4 hover:opacity-80 transition-opacity"
               />

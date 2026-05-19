@@ -1,6 +1,7 @@
 import { Button } from "./ui/button";
 import { Search, Menu, User } from "lucide-react";
-import logo from "../assets/9a08edf2d1705a725f9124e56803bea1d0396d59-DHUs9x5V.jpg";
+import logoLight from "../assets/logo-light.png";
+import logoDark from "../assets/logo-dark.png";
 
 export default function Navbar() {
   return (
@@ -10,9 +11,14 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex items-center flex-shrink-0">
             <img
-              src={logo}
+              src={logoLight}
               alt="TouriGo Logo"
-              className="h-12 w-auto"
+              className="h-12 w-auto dark:hidden"
+            />
+            <img
+              src={logoDark}
+              alt="TouriGo Logo"
+              className="h-12 w-auto hidden dark:block"
             />
           </div>
 

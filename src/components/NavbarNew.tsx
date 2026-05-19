@@ -1,7 +1,8 @@
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Menu, X, Home, Car, Palmtree, UserPlus, Moon, Sun, Globe } from "lucide-react";
-import logo from "../assets/9a08edf2d1705a725f9124e56803bea1d0396d59.jpg";
+import logoLight from "../assets/logo-light.png";
+import logoDark from "../assets/logo-dark.png";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -53,7 +54,7 @@ export default function NavbarNew({ theme, onToggleTheme }: NavbarNewProps) {
             className="flex items-center flex-shrink-0 hover:opacity-80 transition-opacity"
           >
             <img
-              src={logo}
+              src={theme === "dark" ? logoDark : logoLight}
               alt="TouriGo Logo"
               className="h-10 sm:h-12 w-auto"
             />

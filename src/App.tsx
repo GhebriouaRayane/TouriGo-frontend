@@ -219,7 +219,7 @@ export default function App() {
         <main className="flex-grow">
           <AnimatedRoutes />
         </main>
-        <FooterNew />
+        <FooterNew theme={theme} />
         <ChatBot />
         <Toaster position="top-right" richColors closeButton />
       </div>

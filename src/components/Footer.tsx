@@ -1,5 +1,6 @@
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
-import logo from "../assets/9a08edf2d1705a725f9124e56803bea1d0396d59.jpg";
+import logoLight from "../assets/logo-light.png";
+import logoDark from "../assets/logo-dark.png";
 
 export default function Footer() {
   const footerLinks = {
@@ -36,9 +37,14 @@ export default function Footer() {
           {/* Logo and Description */}
           <div className="lg:col-span-1">
             <img
-              src={logo}
+              src={logoLight}
               alt="TouriGo Logo"
-              className="h-16 w-auto mb-4"
+              className="h-16 w-auto mb-4 dark:hidden"
+            />
+            <img
+              src={logoDark}
+              alt="TouriGo Logo"
+              className="h-16 w-auto mb-4 hidden dark:block"
             />
             <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
               Votre plateforme de confiance pour l'immobilier, les véhicules et les activités en Algérie.
