@@ -10,7 +10,7 @@ export default function Categories() {
       borderColor: "border-[rgb(153,163,168)]/20",
       hoverBg: "hover:bg-[rgb(153,163,168)]/5",
       title: "Immobilier",
-      description: "Achetez, louez ou partagez votre logement.",
+      description: "Louez ou partagez votre logement.",
       image: "https://images.unsplash.com/photo-1757264119016-7e6b568b810d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjB2aWxsYSUyMG1lZGl0ZXJyYW5lYW58ZW58MXx8fHwxNzU5Nzg1NTgwfDA&ixlib=rb-4.1.0&q=80&w=1080",
     },
     {
@@ -20,7 +20,7 @@ export default function Categories() {
       borderColor: "border-[rgb(34,45,49)]/20",
       hoverBg: "hover:bg-[rgb(34,45,49)]/5",
       title: "Véhicules",
-      description: "Achetez ou louez voitures et bateaux.",
+      description: "Louez voitures et bateaux.",
       image: "https://images.unsplash.com/photo-1614200179396-2bdb77ebf81b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXJ8ZW58MXx8fHwxNzU5NjY3OTA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
     },
     {
