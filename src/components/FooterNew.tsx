@@ -13,6 +13,7 @@ export default function FooterNew({ theme }: FooterNewProps) {
   const { user } = useAuth();
   const { t } = useLanguage();
   const isHost = user?.role === "host" || user?.role === "admin";
+  const isAdmin = user?.role === "admin";
 
   const footerSections = {
     about: [
@@ -26,6 +27,7 @@ export default function FooterNew({ theme }: FooterNewProps) {
       { name: t("footer.link.contact"), path: "/contact" },
       { name: t("footer.link.terms"), path: "/conditions-utilisation" },
       { name: t("footer.link.privacy"), path: "/politique-confidentialite" },
+      ...(isAdmin ? [{ name: "Administration", path: "/admin" }] : []),
     ],
     hosting: [
       { name: t("footer.link.becomeHost"), path: "/devenir-hote" },

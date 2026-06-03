@@ -21,6 +21,7 @@ import DevenirHote from "./pages/DevenirHote";
 import Immobilier from "./pages/Immobilier";
 import Resultats from "./pages/Resultats";
 import StaticPage from "./pages/StaticPage";
+import Admin from "./pages/Admin";
 import Vehicules from "./pages/Vehicules";
 
 function ScrollToTop() {
@@ -160,6 +161,14 @@ function AnimatedRoutes() {
           <Route path="/devenir-hote" element={<DevenirHote />} />
           <Route path="/resultats" element={<Resultats />} />
           <Route path="/detail/:id" element={<DetailAnnonce />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={

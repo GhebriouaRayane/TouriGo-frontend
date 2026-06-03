@@ -1,6 +1,6 @@
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Menu, X, Home, Car, Palmtree, UserPlus, Moon, Sun, Globe } from "lucide-react";
+import { Menu, X, Home, Car, Palmtree, UserPlus, Moon, Sun, Globe, Shield } from "lucide-react";
 import logoLight from "../assets/logo-light.png";
 import logoDark from "../assets/logo-dark.png";
 import { useEffect, useState } from "react";
@@ -22,6 +22,7 @@ export default function NavbarNew({ theme, onToggleTheme }: NavbarNewProps) {
   const { isAuthenticated, logout, user } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const isHost = user?.role === "host" || user?.role === "admin";
+  const isAdmin = user?.role === "admin";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -35,6 +36,7 @@ export default function NavbarNew({ theme, onToggleTheme }: NavbarNewProps) {
     { path: "/vehicules", label: t("nav.vehicles"), icon: Car },
     { path: "/activites", label: t("nav.activities"), icon: Palmtree },
     ...(!isHost ? [{ path: "/devenir-hote", label: t("nav.becomeHost"), icon: UserPlus }] : []),
+    ...(isAdmin ? [{ path: "/admin", label: "Admin", icon: Shield }] : []),
   ];
 
   const isActive = (path: string) => {

@@ -653,6 +653,44 @@ export function getMyBookingsApi(token: string) {
   return request<ApiBooking[]>("/bookings/me", { token });
 }
 
+export function getAdminUsersApi(token: string) {
+  return request<ApiUser[]>("/auth/admin/users", { token }).then((users) =>
+    users.map(normalizeUser)
+  );
+}
+
+export function updateAdminUserApi(
+  token: string,
+  userId: number,
+  payload: {
+    email: string;
+    full_name?: string | null;
+    avatar_url?: string | null;
+    phone_number?: string | null;
+    role: string;
+  }
+) {
+  return request<ApiUser>(`/auth/admin/users/${userId}`, {
+    method: "PATCH",
+    token,
+    body: payload,
+  }).then(normalizeUser);
+}
+
+export function toggleAdminUserActiveApi(token: string, userId: number) {
+  return request<ApiUser>(`/auth/admin/users/${userId}/toggle-active`, {
+    method: "POST",
+    token,
+  }).then(normalizeUser);
+}
+
+export function deleteAdminUserApi(token: string, userId: number) {
+  return request<{ message: string }>(`/auth/admin/users/${userId}`, {
+    method: "DELETE",
+    token,
+  });
+}
+
 export function createBookingApi(token: string, payload: CreateBookingPayload) {
   return request<ApiBooking>("/bookings/", {
     method: "POST",
