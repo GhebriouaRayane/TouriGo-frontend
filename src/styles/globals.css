@@ -6,8 +6,8 @@
   --font-size: 16px;
 
   /* TouriGo Mediterranean Color Palette */
-  --turquoise: rgb(153, 163, 168);
-  --deep-blue: rgb(34, 45, 49);
+  --turquoise: #7C99B0;
+  --deep-blue: #3A6080;
   --sand: rgb(224, 190, 156);
   --golden-orange: rgb(96, 98, 93);
   --warm-white: rgb(250, 251, 252);
@@ -18,7 +18,7 @@
   --card-foreground: #1a1a1a;
   --popover: #ffffff;
   --popover-foreground: #1a1a1a;
-  --primary: rgb(153, 163, 168);
+  --primary: #7C99B0;
   --primary-foreground: #ffffff;
   --secondary: rgb(224, 190, 156);
   --secondary-foreground: #1a1a1a;
@@ -34,21 +34,21 @@
   --switch-background: #d1d5db;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: rgb(153, 163, 168);
-  --chart-1: rgb(153, 163, 168);
-  --chart-2: rgb(34, 45, 49);
+  --ring: #7C99B0;
+  --chart-1: #7C99B0;
+  --chart-2: #3A6080;
   --chart-3: rgb(224, 190, 156);
   --chart-4: rgb(96, 98, 93);
   --chart-5: rgb(250, 251, 252);
   --radius: 0.75rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #1a1a1a;
-  --sidebar-primary: rgb(153, 163, 168);
+  --sidebar-primary: #7C99B0;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: rgb(250, 251, 252);
   --sidebar-accent-foreground: #1a1a1a;
   --sidebar-border: rgba(0, 0, 0, 0.08);
-  --sidebar-ring: rgb(153, 163, 168);
+  --sidebar-ring: #7C99B0;
 }
 
 .dark {
@@ -58,8 +58,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.145 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: #7C99B0;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -70,22 +70,22 @@
   --destructive-foreground: oklch(0.637 0.237 25.331);
   --border: oklch(0.269 0 0);
   --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
+  --ring: #7C99B0;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-1: #7C99B0;
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: #7C99B0;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --sidebar-ring: #7C99B0;
 }
 
 @theme inline {
@@ -136,6 +136,17 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Light mode gradient background using #5481A0 */
+  :root body {
+    background: linear-gradient(135deg, #E8F0F6 0%, #D4E3EE 25%, #C2D6E6 50%, #B5CCE0 75%, #A8C2DA 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  .dark body {
+    background: var(--background);
   }
 }
 
@@ -461,7 +472,7 @@ textarea:focus {
    ===================== */
 
 .text-shimmer {
-  background: linear-gradient(90deg, var(--primary) 0%, rgb(34, 45, 49) 50%, var(--primary) 100%);
+  background: linear-gradient(90deg, var(--primary) 0%, #3A6080 50%, var(--primary) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

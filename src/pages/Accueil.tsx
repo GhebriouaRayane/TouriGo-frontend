@@ -121,7 +121,7 @@ export default function Accueil() {
             alt="Algerian Mediterranean Coast"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-[rgb(153,163,168)]/80 via-[rgb(34,45,49)]/70 to-[rgb(96,98,93)]/60"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#7C99B0]/80 via-[#3A6080]/70 to-[#5481A0]/60"></div>
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20 w-full">
@@ -152,7 +152,7 @@ export default function Accueil() {
               <TabsList className="w-full grid grid-cols-3 bg-white/95 backdrop-blur-md p-1 rounded-2xl mb-4 shadow-lg">
                 <TabsTrigger
                   value="immobilier"
-                  className="rounded-xl transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
+                  className="rounded-xl transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md"
                 >
                   <Home className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">{t("home.tabs.realEstate")}</span>
@@ -160,7 +160,7 @@ export default function Accueil() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="vehicule"
-                  className="rounded-xl transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
+                  className="rounded-xl transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md"
                 >
                   <Car className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">{t("home.tabs.vehicle")}</span>
@@ -168,7 +168,7 @@ export default function Accueil() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="activite"
-                  className="rounded-xl transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
+                  className="rounded-xl transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md"
                 >
                   <Palmtree className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">{t("home.tabs.activity")}</span>

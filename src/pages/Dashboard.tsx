@@ -2045,7 +2045,7 @@ export default function Dashboard() {
         {/* Hero Dashboard Header */}
         <div
           className="relative mb-8 overflow-hidden rounded-3xl p-6 sm:p-8 text-white"
-          style={{ background: "linear-gradient(135deg, rgb(34,45,49) 0%, rgb(60,75,80) 50%, rgb(96,98,93) 100%)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)" }}
+          style={{ background: "linear-gradient(135deg, #3A6080 0%, #5481A0 50%, #7C99B0 100%)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)" }}
         >
           {/* Decorative background pattern */}
           <div className="pointer-events-none absolute inset-0" style={{ opacity: 0.1 }}>
@@ -2060,7 +2060,7 @@ export default function Dashboard() {
                   {user?.full_name?.charAt(0).toUpperCase() ?? "U"}
                 </AvatarFallback>
               </Avatar>
-              <span className="absolute rounded-full" style={{ bottom: "4px", right: "4px", width: "20px", height: "20px", background: "#34d399", border: "3px solid rgb(34,45,49)", boxShadow: "0 2px 4px rgba(0,0,0,0.3)" }} />
+              <span className="absolute rounded-full" style={{ bottom: "4px", right: "4px", width: "20px", height: "20px", background: "#34d399", border: "3px solid #3A6080", boxShadow: "0 2px 4px rgba(0,0,0,0.3)" }} />
             </div>
             <div className="flex-1">
               <h1 className="text-2xl sm:text-3xl font-bold" style={{ letterSpacing: "-0.025em", color: "white" }}>{user?.full_name || tr("Utilisateur 3ich")}</h1>
@@ -2124,21 +2124,21 @@ export default function Dashboard() {
             >
               <TabsTrigger
                 value="reservations"
-                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
+                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md"
               >
                 <Calendar className="w-4 h-4" />
                 <span className="hidden sm:inline">{tr("Reservations")}</span>
               </TabsTrigger>
               <TabsTrigger
                 value="annonces"
-                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
+                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md"
               >
                 <MapPin className="w-4 h-4" />
                 <span className="hidden sm:inline">{tr("Ajouter une annonce")}</span>
               </TabsTrigger>
               <TabsTrigger
                 value="messages"
-                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
+                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span className="hidden sm:inline">{tr("Messages")}</span>
@@ -2150,7 +2150,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger
                 value="profil"
-                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-[rgb(153,163,168)] data-[state=active]:to-[rgb(153,163,168)] data-[state=active]:text-white data-[state=active]:shadow-md"
+                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md"
               >
                 <Settings className="w-4 h-4" />
                 <span className="hidden sm:inline">{tr("Parametre")}</span>
@@ -3209,7 +3209,7 @@ export default function Dashboard() {
                                   <div key={message.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                                     <div
                                       className={`max-w-[92%] rounded-3xl border px-4 py-3 text-sm shadow-sm sm:max-w-[80%] ${isMine
-                                        ? "border-[rgb(34,45,49)]/30 bg-gradient-to-br from-[rgb(34,45,49)] to-[rgb(60,75,80)] text-white"
+                                        ? "border-[#3A6080]/30 bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white"
                                         : "border-slate-200 bg-white text-foreground"
                                         }`}
                                     >
@@ -3298,7 +3298,7 @@ export default function Dashboard() {
                   <div className="relative">
                     <Avatar className="w-24 h-24" style={{ border: "4px solid var(--primary)", boxShadow: "0 0 0 4px rgba(0,166,166,0.1), 0 10px 15px -3px rgba(0,0,0,0.1)" }}>
                       <AvatarImage src={profileForm.avatar_url || undefined} />
-                      <AvatarFallback className="text-white text-2xl font-bold" style={{ background: "linear-gradient(135deg, var(--primary), rgb(34,45,49))" }}>
+                      <AvatarFallback className="text-white text-2xl font-bold" style={{ background: "linear-gradient(135deg, #7C99B0, #3A6080)" }}>
                         {user?.full_name?.charAt(0).toUpperCase() ?? "U"}
                       </AvatarFallback>
                     </Avatar>

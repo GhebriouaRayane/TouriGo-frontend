@@ -23,8 +23,8 @@ const roleLabels: Record<string, string> = {
 
 const roleStyles: Record<string, string> = {
   user: "bg-slate-100 text-slate-700",
-  host: "bg-[rgb(96,98,93)]/12 text-[rgb(96,98,93)]",
-  admin: "bg-[rgb(34,45,49)]/10 text-[rgb(34,45,49)]",
+  host: "bg-[#5481A0]/12 text-[#5481A0]",
+  admin: "bg-[#3A6080]/10 text-[#3A6080]",
 };
 
 function formatDate(value: string) {
@@ -82,9 +82,9 @@ export default function Admin() {
   }, [users]);
 
   const overviewCards: StatCard[] = [
-    { label: "Utilisateurs", value: String(userStats.total), helper: `${userStats.active} actifs`, icon: Users, tone: "from-[rgb(34,45,49)]/10 to-[rgb(34,45,49)]/5" },
-    { label: "Hôtes", value: String(userStats.host), helper: `${userStats.admin} admin(s)`, icon: UserCheck, tone: "from-[rgb(96,98,93)]/12 to-[rgb(96,98,93)]/6" },
-    { label: "Sécurité", value: "Total", helper: "Accès admin complet", icon: Shield, tone: "from-[rgb(34,45,49)]/12 to-[rgb(96,98,93)]/8" },
+    { label: "Utilisateurs", value: String(userStats.total), helper: `${userStats.active} actifs`, icon: Users, tone: "from-[#3A6080]/10 to-[#3A6080]/5" },
+    { label: "Hôtes", value: String(userStats.host), helper: `${userStats.admin} admin(s)`, icon: UserCheck, tone: "from-[#5481A0]/12 to-[#5481A0]/6" },
+    { label: "Sécurité", value: "Total", helper: "Accès admin complet", icon: Shield, tone: "from-[#3A6080]/12 to-[#5481A0]/8" },
   ];
 
   const filteredUsers = useMemo(() => {
@@ -193,7 +193,7 @@ export default function Admin() {
     return (
       <div className="min-h-[70vh] flex items-center justify-center px-4">
         <div className="rounded-3xl border border-border bg-white p-6 shadow-sm text-center">
-          <div className="text-lg font-semibold text-[rgb(34,45,49)]">Chargement de l&apos;accès admin...</div>
+          <div className="text-lg font-semibold text-[#3A6080]">Chargement de l&apos;accès admin...</div>
           <div className="mt-2 text-sm text-muted-foreground">Vérification du compte connecté.</div>
         </div>
       </div>
@@ -204,15 +204,15 @@ export default function Admin() {
     return (
       <div className="min-h-[70vh] flex items-center justify-center px-4">
         <div className="max-w-lg rounded-3xl border border-border bg-white p-6 sm:p-8 shadow-sm text-center">
-          <Shield className="mx-auto h-10 w-10 text-[rgb(34,45,49)]" />
-          <h1 className="mt-4 text-2xl font-semibold text-[rgb(34,45,49)]">Connexion requise</h1>
+          <Shield className="mx-auto h-10 w-10 text-[#3A6080]" />
+          <h1 className="mt-4 text-2xl font-semibold text-[#3A6080]">Connexion requise</h1>
           <p className="mt-3 text-sm text-muted-foreground leading-6">
             Vous devez être connecté avec un compte admin pour ouvrir cette page.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
               to="/connexion"
-              className="inline-flex items-center rounded-full bg-[rgb(34,45,49)] px-5 py-3 text-sm font-medium text-white"
+              className="inline-flex items-center rounded-full bg-[#3A6080] px-5 py-3 text-sm font-medium text-white"
             >
               Aller à la connexion
             </Link>
@@ -232,18 +232,18 @@ export default function Admin() {
     return (
       <div className="min-h-[70vh] flex items-center justify-center px-4">
         <div className="max-w-lg rounded-3xl border border-border bg-white p-6 sm:p-8 shadow-sm text-center">
-          <Shield className="mx-auto h-10 w-10 text-[rgb(96,98,93)]" />
-          <h1 className="mt-4 text-2xl font-semibold text-[rgb(34,45,49)]">Accès refusé</h1>
+          <Shield className="mx-auto h-10 w-10 text-[#5481A0]" />
+          <h1 className="mt-4 text-2xl font-semibold text-[#3A6080]">Accès refusé</h1>
           <p className="mt-3 text-sm text-muted-foreground leading-6">
             Le compte connecté est bien reconnu, mais il n&apos;a pas le rôle admin.
           </p>
-          <p className="mt-2 text-sm text-[rgb(34,45,49)] font-medium">
+          <p className="mt-2 text-sm text-[#3A6080] font-medium">
             Compte actuel: {user.email}
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
               to="/dashboard"
-              className="inline-flex items-center rounded-full bg-[rgb(34,45,49)] px-5 py-3 text-sm font-medium text-white"
+              className="inline-flex items-center rounded-full bg-[#3A6080] px-5 py-3 text-sm font-medium text-white"
             >
               Ouvrir le dashboard
             </Link>
@@ -268,7 +268,7 @@ export default function Admin() {
               <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground mb-3">
                 TouriGo Admin
               </p>
-              <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-[rgb(34,45,49)] mb-4">
+              <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-[#3A6080] mb-4">
                 Utilisateurs réels
               </h1>
               <p className="text-base sm:text-lg text-muted-foreground leading-7">
@@ -287,7 +287,7 @@ export default function Admin() {
               </button>
               <Link
                 to="/dashboard"
-                className="inline-flex items-center gap-2 rounded-full bg-[rgb(34,45,49)] px-5 py-3 text-sm font-medium text-white shadow-lg shadow-black/10 transition-transform hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 rounded-full bg-[#3A6080] px-5 py-3 text-sm font-medium text-white shadow-lg shadow-black/10 transition-transform hover:-translate-y-0.5"
               >
                 Ouvrir mon dashboard
                 <ArrowUpRight className="h-4 w-4" />
@@ -314,11 +314,11 @@ export default function Admin() {
               >
                 <div className="flex items-start justify-between gap-4 mb-8">
                   <div className="rounded-2xl bg-white/90 p-3 shadow-sm">
-                    <Icon className="h-5 w-5 text-[rgb(34,45,49)]" />
+                    <Icon className="h-5 w-5 text-[#3A6080]" />
                   </div>
                   <span className="text-xs font-medium text-muted-foreground">{card.helper}</span>
                 </div>
-                <div className="text-3xl font-semibold tracking-tight text-[rgb(34,45,49)] mb-2">
+                <div className="text-3xl font-semibold tracking-tight text-[#3A6080] mb-2">
                   {card.value}
                 </div>
                 <div className="text-sm text-muted-foreground">{card.label}</div>
@@ -330,7 +330,7 @@ export default function Admin() {
         <article className="rounded-3xl border border-border bg-white p-5 sm:p-6 shadow-[0_10px_30px_rgba(34,45,49,0.04)]">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-5">
             <div>
-              <h2 className="text-xl font-semibold text-[rgb(34,45,49)]">Liste des utilisateurs</h2>
+              <h2 className="text-xl font-semibold text-[#3A6080]">Liste des utilisateurs</h2>
               <p className="text-sm text-muted-foreground mt-1">
                 Recherche, filtre par rôle et vue des comptes actifs.
               </p>
@@ -345,7 +345,7 @@ export default function Admin() {
                     onClick={() => setRoleFilter(role)}
                     className={`rounded-full px-3 py-2 text-sm font-medium transition-colors ${
                       isActive
-                        ? "bg-[rgb(34,45,49)] text-white"
+                        ? "bg-[#3A6080] text-white"
                         : "border border-border bg-white text-foreground hover:bg-accent"
                     }`}
                   >
@@ -391,10 +391,10 @@ export default function Admin() {
                 {filteredUsers.map((account) => (
                   <div key={account.id} className="grid gap-4 px-4 py-4 lg:grid-cols-[1.1fr_1.2fr_0.9fr_0.8fr_1fr_auto] lg:items-center">
                     <div>
-                      <div className="font-semibold text-[rgb(34,45,49)] flex items-center gap-2">
+                      <div className="font-semibold text-[#3A6080] flex items-center gap-2">
                         {account.full_name || account.email}
                         {account.id === user?.id ? (
-                          <span className="rounded-full bg-[rgb(34,45,49)]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[rgb(34,45,49)]">
+                          <span className="rounded-full bg-[#3A6080]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#3A6080]">
                             Vous
                           </span>
                         ) : null}
@@ -445,7 +445,7 @@ export default function Admin() {
                         type="button"
                         onClick={() => toggleUserActive(account)}
                         disabled={actionUserId === account.id}
-                        className="inline-flex items-center gap-1 rounded-full bg-[rgb(34,45,49)] px-3 py-2 text-xs font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex items-center gap-1 rounded-full bg-[#3A6080] px-3 py-2 text-xs font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {account.is_active ? <UserX className="h-3.5 w-3.5" /> : <UserPlus2 className="h-3.5 w-3.5" />}
                         {account.is_active ? "Désactiver" : "Activer"}

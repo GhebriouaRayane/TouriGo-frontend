@@ -107,7 +107,7 @@ export default function NavbarNew({ theme, onToggleTheme }: NavbarNewProps) {
                 <Link to="/dashboard" className="relative group">
                   <Avatar className="w-9 h-9" style={{ border: "2px solid var(--primary)", opacity: 0.9, transition: "all 0.2s" }}>
                     <AvatarImage src={user?.avatar_url || undefined} />
-                    <AvatarFallback className="text-white text-sm font-semibold" style={{ background: "linear-gradient(135deg, var(--primary), rgb(34,45,49))" }}>
+                    <AvatarFallback className="text-white text-sm font-semibold" style={{ background: "linear-gradient(135deg, #7C99B0, #3A6080)" }}>
                       {user?.full_name?.charAt(0).toUpperCase() ?? "U"}
                     </AvatarFallback>
                   </Avatar>
@@ -116,7 +116,7 @@ export default function NavbarNew({ theme, onToggleTheme }: NavbarNewProps) {
                 <Button
                   type="button"
                   onClick={logout}
-                  className="rounded-full bg-gradient-to-r from-[rgb(153,163,168)] to-[rgb(96,98,93)] hover:opacity-90"
+                  className="rounded-full bg-primary hover:opacity-90"
                 >
                   {t("nav.logout")}
                 </Button>
@@ -133,7 +133,7 @@ export default function NavbarNew({ theme, onToggleTheme }: NavbarNewProps) {
                 </Link>
                 <Link to="/inscription">
                   <Button
-                    className="rounded-full bg-gradient-to-r from-[rgb(153,163,168)] to-[rgb(96,98,93)] hover:opacity-90"
+                    className="rounded-full bg-primary hover:opacity-90"
                   >
                     {t("nav.register")}
                   </Button>
@@ -209,7 +209,7 @@ export default function NavbarNew({ theme, onToggleTheme }: NavbarNewProps) {
                     >
                       <Avatar className="w-10 h-10" style={{ border: "2px solid var(--primary)", opacity: 0.9 }}>
                         <AvatarImage src={user?.avatar_url || undefined} />
-                        <AvatarFallback className="text-white text-sm font-semibold" style={{ background: "linear-gradient(135deg, var(--primary), rgb(34,45,49))" }}>
+                        <AvatarFallback className="text-white text-sm font-semibold" style={{ background: "linear-gradient(135deg, #7C99B0, #3A6080)" }}>
                           {user?.full_name?.charAt(0).toUpperCase() ?? "U"}
                         </AvatarFallback>
                       </Avatar>
@@ -232,7 +232,7 @@ export default function NavbarNew({ theme, onToggleTheme }: NavbarNewProps) {
                         logout();
                         setMobileMenuOpen(false);
                       }}
-                      className="w-full rounded-full bg-gradient-to-r from-[rgb(153,163,168)] to-[rgb(96,98,93)]"
+                      className="w-full rounded-full bg-primary"
                     >
                       {t("nav.logout")}
                     </Button>
@@ -249,7 +249,7 @@ export default function NavbarNew({ theme, onToggleTheme }: NavbarNewProps) {
                     </Link>
                     <Link to="/inscription" onClick={() => setMobileMenuOpen(false)}>
                       <Button
-                        className="w-full rounded-full bg-gradient-to-r from-[rgb(153,163,168)] to-[rgb(96,98,93)]"
+                        className="w-full rounded-full bg-primary"
                       >
                         {t("nav.register")}
                       </Button>

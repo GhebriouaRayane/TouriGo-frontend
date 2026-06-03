@@ -353,8 +353,8 @@ function Login() {
                   type="button"
                   onClick={() => { setLoginMethod("email"); setError(null); }}
                   className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${loginMethod === "email"
-                    ? "border-[rgb(34,45,49)] bg-gradient-to-br from-[rgb(34,45,49)] to-[rgb(60,80,90)] text-white shadow-lg scale-[1.02]"
-                    : "border-border text-muted-foreground hover:border-[rgb(153,163,168)] hover:bg-accent/50 hover:scale-[1.01]"
+                    ? "border-[#3A6080] bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white shadow-lg scale-[1.02]"
+                    : "border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-accent/50 hover:scale-[1.01]"
                     }`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -370,8 +370,8 @@ function Login() {
                   type="button"
                   onClick={() => { setLoginMethod("phone"); setError(null); }}
                   className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${loginMethod === "phone"
-                    ? "border-[rgb(34,45,49)] bg-gradient-to-br from-[rgb(34,45,49)] to-[rgb(60,80,90)] text-white shadow-lg scale-[1.02]"
-                    : "border-border text-muted-foreground hover:border-[rgb(153,163,168)] hover:bg-accent/50 hover:scale-[1.01]"
+                    ? "border-[#3A6080] bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white shadow-lg scale-[1.02]"
+                    : "border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-accent/50 hover:scale-[1.01]"
                     }`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -416,7 +416,7 @@ function Login() {
               <button
                 type="submit"
                 disabled={submitting || googleSubmitting}
-                className="px-12 py-3 bg-gradient-to-r from-[rgb(153,163,168)] to-[rgb(34,45,49)] text-white rounded-xl hover:opacity-90 transition-opacity shadow-lg disabled:opacity-60"
+                className="px-12 py-3 bg-gradient-to-r from-[#7C99B0] to-[#3A6080] text-white rounded-xl hover:opacity-90 transition-opacity shadow-lg disabled:opacity-60"
               >
                 {submitting ? t("auth.login.submitting") : t("auth.login.submit")}
               </button>
@@ -644,8 +644,8 @@ function Register() {
                       type="button"
                       onClick={() => setRegistrationMethod("email")}
                       className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${registrationMethod === "email"
-                        ? "border-[rgb(34,45,49)] bg-gradient-to-br from-[rgb(34,45,49)] to-[rgb(60,80,90)] text-white shadow-lg scale-[1.02]"
-                        : "border-border text-muted-foreground hover:border-[rgb(153,163,168)] hover:bg-accent/50 hover:scale-[1.01]"
+                        ? "border-[#3A6080] bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white shadow-lg scale-[1.02]"
+                        : "border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-accent/50 hover:scale-[1.01]"
                         }`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -661,8 +661,8 @@ function Register() {
                       type="button"
                       onClick={() => setRegistrationMethod("phone")}
                       className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${registrationMethod === "phone"
-                        ? "border-[rgb(34,45,49)] bg-gradient-to-br from-[rgb(34,45,49)] to-[rgb(60,80,90)] text-white shadow-lg scale-[1.02]"
-                        : "border-border text-muted-foreground hover:border-[rgb(153,163,168)] hover:bg-accent/50 hover:scale-[1.01]"
+                        ? "border-[#3A6080] bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white shadow-lg scale-[1.02]"
+                        : "border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-accent/50 hover:scale-[1.01]"
                         }`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -716,8 +716,8 @@ function Register() {
                       type="button"
                       onClick={() => setAccessType("client")}
                       className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${accessType === "client"
-                        ? "border-[rgb(34,45,49)] bg-gradient-to-br from-[rgb(34,45,49)] to-[rgb(60,80,90)] text-white shadow-lg scale-[1.02]"
-                        : "border-border text-muted-foreground hover:border-[rgb(153,163,168)] hover:bg-accent/50 hover:scale-[1.01]"
+                        ? "border-[#3A6080] bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white shadow-lg scale-[1.02]"
+                        : "border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-accent/50 hover:scale-[1.01]"
                         }`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -733,8 +733,8 @@ function Register() {
                       type="button"
                       onClick={() => setAccessType("host")}
                       className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${accessType === "host"
-                        ? "border-[rgb(34,45,49)] bg-gradient-to-br from-[rgb(34,45,49)] to-[rgb(60,80,90)] text-white shadow-lg scale-[1.02]"
-                        : "border-border text-muted-foreground hover:border-[rgb(153,163,168)] hover:bg-accent/50 hover:scale-[1.01]"
+                        ? "border-[#3A6080] bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white shadow-lg scale-[1.02]"
+                        : "border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-accent/50 hover:scale-[1.01]"
                         }`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -813,7 +813,7 @@ function Register() {
               <button
                 type="submit"
                 disabled={submitting || googleSubmitting}
-                className="px-12 py-3 bg-gradient-to-r from-[rgb(153,163,168)] to-[rgb(34,45,49)] text-white rounded-xl hover:opacity-90 transition-opacity shadow-lg disabled:opacity-60"
+                className="px-12 py-3 bg-gradient-to-r from-[#7C99B0] to-[#3A6080] text-white rounded-xl hover:opacity-90 transition-opacity shadow-lg disabled:opacity-60"
               >
                 {submitting ? t("auth.register.submitting") : step === "request" ? t("auth.register.submitRequest") : t("auth.register.submitVerify")}
               </button>

@@ -13,7 +13,7 @@ export default function Hero() {
           className="w-full h-full object-cover"
         />
         {/* Gradient Overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[rgb(34,45,49)]/70 via-[rgb(34,45,49)]/50 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#3A6080]/70 via-[#3A6080]/50 to-transparent"></div>
       </div>
 
       {/* Content */}
@@ -29,7 +29,7 @@ export default function Hero() {
           
           <Button
             size="lg"
-            className="bg-[rgb(153,163,168)] hover:bg-[rgb(153,163,168)]/90 text-white shadow-2xl px-10 py-7 text-lg rounded-full"
+            className="bg-[#7C99B0] hover:bg-[#7C99B0]/90 text-white shadow-2xl px-10 py-7 text-lg rounded-full"
           >
             <Search className="w-5 h-5 mr-2" />
             Commencer l'exploration
