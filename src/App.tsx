@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, CSSProperties, useEffect, useRef, useState } from "react";
 import { Capacitor, PluginListenerHandle, registerPlugin } from "@capacitor/core";
 import { BrowserRouter as Router, Link, Navigate, Route, Routes, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -126,6 +126,31 @@ function ProtectedRoute({ children }: { children: React.ReactElement }) {
 type Theme = "light" | "dark";
 
 const THEME_STORAGE_KEY = "tourigo-theme";
+const AUTH_GRADIENT = "bg-gradient-to-r from-[#3A6080] via-[#5481A0] to-[#7C99B0]";
+const AUTH_GRADIENT_HOVER = "hover:from-[#335975] hover:via-[#4c7894] hover:to-[#6f92aa]";
+const AUTH_GRADIENT_SHADOW = "shadow-[0_18px_35px_rgba(58,96,128,0.28)]";
+const AUTH_TOGGLE_ACTIVE = "active:border-transparent active:bg-gradient-to-r active:from-[#3A6080] active:via-[#5481A0] active:to-[#7C99B0] active:text-white active:shadow-[0_18px_35px_rgba(58,96,128,0.28)]";
+const AUTH_TOGGLE_BASE = "bg-primary/10 dark:bg-background/80";
+const AUTH_TOGGLE_STATE = "active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-primary/40";
+const LOGIN_TOGGLE_SELECTED = "border-transparent bg-gradient-to-r from-[#3A6080] via-[#5481A0] to-[#7C99B0] text-white shadow-[0_18px_35px_rgba(58,96,128,0.28)] scale-[1.02]";
+const LOGIN_TOGGLE_INACTIVE = "border-border bg-background/90 text-muted-foreground hover:border-[#7C99B0] hover:bg-[#EEF5FA] hover:text-[#335975] hover:scale-[1.01]";
+const LOGIN_SUBMIT_BUTTON = "px-12 py-3 bg-gradient-to-r from-[#3A6080] via-[#5481A0] to-[#7C99B0] hover:from-[#335975] hover:via-[#4c7894] hover:to-[#6f92aa] text-white rounded-xl transition-all shadow-[0_18px_35px_rgba(58,96,128,0.28)] active:scale-[0.98] active:from-[#2F526C] active:via-[#456D87] active:to-[#668AA1] focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-60 disabled:hover:from-[#3A6080] disabled:hover:via-[#5481A0] disabled:hover:to-[#7C99B0]";
+const LOGIN_TOGGLE_SELECTED_STYLE: CSSProperties = {
+  backgroundImage: "linear-gradient(to right, #3A6080, #5481A0, #7C99B0)",
+  color: "#FFFFFF",
+  borderColor: "transparent",
+  boxShadow: "0 18px 35px rgba(58,96,128,0.28)",
+};
+const LOGIN_TOGGLE_INACTIVE_STYLE: CSSProperties = {
+  backgroundColor: "rgba(255, 255, 255, 0.9)",
+  color: "#627483",
+  borderColor: "#D6E2EA",
+};
+const LOGIN_SUBMIT_STYLE: CSSProperties = {
+  backgroundImage: "linear-gradient(to right, #3A6080, #5481A0, #7C99B0)",
+  color: "#FFFFFF",
+  boxShadow: "0 18px 35px rgba(58,96,128,0.28)",
+};
 
 function getInitialTheme(): Theme {
   if (typeof window === "undefined") {
@@ -352,10 +377,8 @@ function Login() {
                 <button
                   type="button"
                   onClick={() => { setLoginMethod("email"); setError(null); }}
-                  className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${loginMethod === "email"
-                    ? "border-[#3A6080] bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white shadow-lg scale-[1.02]"
-                    : "border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-accent/50 hover:scale-[1.01]"
-                    }`}
+                  className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${AUTH_TOGGLE_STATE} ${loginMethod === "email" ? LOGIN_TOGGLE_SELECTED : LOGIN_TOGGLE_INACTIVE}`}
+                  style={loginMethod === "email" ? LOGIN_TOGGLE_SELECTED_STYLE : LOGIN_TOGGLE_INACTIVE_STYLE}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect width="20" height="16" x="2" y="4" rx="2" />
@@ -369,10 +392,8 @@ function Login() {
                 <button
                   type="button"
                   onClick={() => { setLoginMethod("phone"); setError(null); }}
-                  className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${loginMethod === "phone"
-                    ? "border-[#3A6080] bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white shadow-lg scale-[1.02]"
-                    : "border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-accent/50 hover:scale-[1.01]"
-                    }`}
+                  className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${AUTH_TOGGLE_STATE} ${loginMethod === "phone" ? LOGIN_TOGGLE_SELECTED : LOGIN_TOGGLE_INACTIVE}`}
+                  style={loginMethod === "phone" ? LOGIN_TOGGLE_SELECTED_STYLE : LOGIN_TOGGLE_INACTIVE_STYLE}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.58 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
@@ -413,11 +434,12 @@ function Login() {
             />
             {error && <p className="text-sm text-red-500">{error}</p>}
             <div className="flex justify-center pt-2">
-              <button
-                type="submit"
-                disabled={submitting || googleSubmitting}
-                className="px-12 py-3 bg-gradient-to-r from-[#7C99B0] to-[#3A6080] text-white rounded-xl hover:opacity-90 transition-opacity shadow-lg disabled:opacity-60"
-              >
+                <button
+                  type="submit"
+                  disabled={submitting || googleSubmitting}
+                  className={LOGIN_SUBMIT_BUTTON}
+                  style={LOGIN_SUBMIT_STYLE}
+                >
                 {submitting ? t("auth.login.submitting") : t("auth.login.submit")}
               </button>
             </div>
@@ -643,10 +665,11 @@ function Register() {
                     <button
                       type="button"
                       onClick={() => setRegistrationMethod("email")}
-                      className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${registrationMethod === "email"
-                        ? "border-[#3A6080] bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white shadow-lg scale-[1.02]"
-                        : "border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-accent/50 hover:scale-[1.01]"
+                      className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${AUTH_TOGGLE_BASE} ${AUTH_TOGGLE_STATE} ${registrationMethod === "email"
+                        ? `border-transparent ${AUTH_GRADIENT} text-white ${AUTH_GRADIENT_SHADOW} scale-[1.02] ${AUTH_TOGGLE_ACTIVE}`
+                        : `border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-primary/5 hover:text-primary hover:scale-[1.01] ${AUTH_TOGGLE_ACTIVE}`
                         }`}
+                      style={registrationMethod === "email" ? LOGIN_TOGGLE_SELECTED_STYLE : LOGIN_TOGGLE_INACTIVE_STYLE}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect width="20" height="16" x="2" y="4" rx="2" />
@@ -660,10 +683,11 @@ function Register() {
                     <button
                       type="button"
                       onClick={() => setRegistrationMethod("phone")}
-                      className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${registrationMethod === "phone"
-                        ? "border-[#3A6080] bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white shadow-lg scale-[1.02]"
-                        : "border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-accent/50 hover:scale-[1.01]"
+                      className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${AUTH_TOGGLE_BASE} ${AUTH_TOGGLE_STATE} ${registrationMethod === "phone"
+                        ? `border-transparent ${AUTH_GRADIENT} text-white ${AUTH_GRADIENT_SHADOW} scale-[1.02] ${AUTH_TOGGLE_ACTIVE}`
+                        : `border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-primary/5 hover:text-primary hover:scale-[1.01] ${AUTH_TOGGLE_ACTIVE}`
                         }`}
+                      style={registrationMethod === "phone" ? LOGIN_TOGGLE_SELECTED_STYLE : LOGIN_TOGGLE_INACTIVE_STYLE}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.58 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
@@ -715,10 +739,11 @@ function Register() {
                     <button
                       type="button"
                       onClick={() => setAccessType("client")}
-                      className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${accessType === "client"
-                        ? "border-[#3A6080] bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white shadow-lg scale-[1.02]"
-                        : "border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-accent/50 hover:scale-[1.01]"
+                      className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${AUTH_TOGGLE_BASE} ${AUTH_TOGGLE_STATE} ${accessType === "client"
+                        ? `border-transparent ${AUTH_GRADIENT} text-white ${AUTH_GRADIENT_SHADOW} scale-[1.02] ${AUTH_TOGGLE_ACTIVE}`
+                        : `border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-primary/5 hover:text-primary hover:scale-[1.01] ${AUTH_TOGGLE_ACTIVE}`
                         }`}
+                      style={accessType === "client" ? LOGIN_TOGGLE_SELECTED_STYLE : LOGIN_TOGGLE_INACTIVE_STYLE}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="8" r="5" />
@@ -732,10 +757,11 @@ function Register() {
                     <button
                       type="button"
                       onClick={() => setAccessType("host")}
-                      className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${accessType === "host"
-                        ? "border-[#3A6080] bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white shadow-lg scale-[1.02]"
-                        : "border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-accent/50 hover:scale-[1.01]"
+                      className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-2xl border-2 transition-all duration-200 font-medium text-sm ${AUTH_TOGGLE_BASE} ${AUTH_TOGGLE_STATE} ${accessType === "host"
+                        ? `border-transparent ${AUTH_GRADIENT} text-white ${AUTH_GRADIENT_SHADOW} scale-[1.02] ${AUTH_TOGGLE_ACTIVE}`
+                        : `border-border text-muted-foreground hover:border-[#7C99B0] hover:bg-primary/5 hover:text-primary hover:scale-[1.01] ${AUTH_TOGGLE_ACTIVE}`
                         }`}
+                      style={accessType === "host" ? LOGIN_TOGGLE_SELECTED_STYLE : LOGIN_TOGGLE_INACTIVE_STYLE}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -813,7 +839,8 @@ function Register() {
               <button
                 type="submit"
                 disabled={submitting || googleSubmitting}
-                className="px-12 py-3 bg-gradient-to-r from-[#7C99B0] to-[#3A6080] text-white rounded-xl hover:opacity-90 transition-opacity shadow-lg disabled:opacity-60"
+                className={`px-12 py-3 ${AUTH_GRADIENT} ${AUTH_GRADIENT_HOVER} text-white rounded-xl transition-all ${AUTH_GRADIENT_SHADOW} active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-60 disabled:hover:from-[#3A6080] disabled:hover:via-[#5481A0] disabled:hover:to-[#7C99B0]`}
+                style={LOGIN_SUBMIT_STYLE}
               >
                 {submitting ? t("auth.register.submitting") : step === "request" ? t("auth.register.submitRequest") : t("auth.register.submitVerify")}
               </button>

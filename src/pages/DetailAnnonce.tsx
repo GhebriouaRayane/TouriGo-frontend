@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { motion } from "framer-motion";
 import type { Locale } from "date-fns";
 import { ar, enUS, fr } from "date-fns/locale";
@@ -1527,7 +1527,7 @@ export default function DetailAnnonce() {
               {availabilityDates.length === 0 ? (
                 <p className="text-muted-foreground">{tr("Aucune date specifique renseignee par l'hote.")}</p>
               ) : (
-                <div className="overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50 shadow-sm">
+                <div className="overflow-hidden rounded-3xl border border-emerald-100 bg-[#F5F9FC] shadow-sm">
                   <CalendarPicker
                     className="w-full p-4"
                     locale={calendarLocale}
@@ -1537,13 +1537,14 @@ export default function DetailAnnonce() {
                     modifiers={{ available: availabilityDateObjects }}
                     modifiersStyles={{
                       available: {
-                        backgroundColor: "rgb(130, 133, 134)",
+                        backgroundColor: "#5481A0",
                         color: "#ffffff",
                         borderRadius: "9999px",
-                      },
+                        boxShadow: "0 14px 28px rgba(58,96,128,0.24)",
+                      } satisfies CSSProperties,
                     }}
                     modifiersClassNames={{
-                      available: "!text-white font-bold shadow-sm ring-2 ring-border ring-offset-2 hover:!text-white focus:!text-white dark:!text-white dark:hover:!text-white dark:focus:!text-white",
+                      available: "!text-white font-bold shadow-sm ring-2 ring-[#7C99B0] ring-offset-2 hover:!text-white focus:!text-white dark:!text-white dark:hover:!text-white dark:focus:!text-white",
                       today: "ring-2 ring-amber-300 ring-offset-2",
                     }}
                     classNames={{
@@ -1559,7 +1560,7 @@ export default function DetailAnnonce() {
                   />
                   <div className="border-t border-emerald-100 bg-white/80 px-5 py-3 text-sm text-muted-foreground">
                     <span className="inline-flex items-center gap-2">
-                      <span className="h-3 w-3 rounded-full bg-slate-300" />
+                      <span className="h-3 w-3 rounded-full bg-[#5481A0]" />
                       {tr("{count} date(s) disponible(s)", { count: availabilityDates.length })}
                     </span>
                   </div>

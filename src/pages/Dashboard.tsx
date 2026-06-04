@@ -41,6 +41,12 @@ import { formatListingRating } from "../lib/listingRatings";
 import { makeTranslator } from "../i18n/localize";
 import { Bell, Calendar, Check, Heart, MapPin, MessageCircle, Plus, SendHorizontal, Settings, Star, X } from "lucide-react";
 
+function sortByCreatedAtDesc<T extends { created_at: string }>(items: T[]) {
+  return [...items].sort(
+    (left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime()
+  );
+}
+
 const DASHBOARD_TRANSLATIONS = {
   fr: {},
   en: {
@@ -742,6 +748,7 @@ export default function Dashboard() {
   const [favoriteListings, setFavoriteListings] = useState<ApiListing[]>([]);
   const [myBookings, setMyBookings] = useState<ApiBooking[]>([]);
   const [hostBookings, setHostBookings] = useState<ApiBooking[]>([]);
+  const [selectedBookingDetailId, setSelectedBookingDetailId] = useState<number | null>(null);
   const [bookingMessages, setBookingMessages] = useState<ApiMessage[]>([]);
   const [selectedConversationBookingId, setSelectedConversationBookingId] = useState<number | null>(null);
   const [messagesView, setMessagesView] = useState<"notifications" | "messages">("messages");
@@ -782,6 +789,7 @@ export default function Dashboard() {
   });
   const { user, token, refreshMe, logout } = useAuth();
   const { notifications, loadingNotifications, unreadNotificationsCount, refreshNotifications } = useNotificationCenter();
+  const sortedNotifications = useMemo(() => sortByCreatedAtDesc(notifications), [notifications]);
 
   const [profileForm, setProfileForm] = useState({
     email: "",
@@ -804,6 +812,19 @@ export default function Dashboard() {
   const isHost = HOST_ROLES.has(user?.role ?? "");
   const { language, locale } = useLanguage();
   const tr = useMemo(() => makeTranslator(language, DASHBOARD_TRANSLATIONS), [language]);
+  const isDarkMode = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+  const dashboardTabTextClass = "!text-black !opacity-100 [&_svg]:!text-black";
+  const dashboardTabsListStyle = isDarkMode
+    ? {
+        background: "#FFFFFF",
+        backdropFilter: "blur(12px)",
+        boxShadow: "0 10px 15px -3px rgba(0,0,0,0.08)",
+      }
+    : {
+        background: "rgba(255,255,255,0.85)",
+        backdropFilter: "blur(12px)",
+        boxShadow: "0 10px 15px -3px rgba(0,0,0,0.08)",
+      };
   const calendarLocale = useMemo(() => {
     if (language === "en") return enUS;
     if (language === "ar") return ar;
@@ -1077,6 +1098,7 @@ export default function Dashboard() {
     () => notifications.filter((notification) => !notification.is_read && notification.type === "message").length,
     [notifications]
   );
+  const sortedBookingMessages = useMemo(() => sortByCreatedAtDesc(bookingMessages), [bookingMessages]);
 
   const notificationTypeSurfaceClass = (type: ApiNotification["type"]) => {
     if (type === "message") {
@@ -1104,6 +1126,14 @@ export default function Dashboard() {
         ? conversationBookings.find((booking) => booking.id === selectedConversationBookingId) ?? null
         : null,
     [conversationBookings, selectedConversationBookingId]
+  );
+
+  const selectedBookingDetail = useMemo(
+    () =>
+      selectedBookingDetailId
+        ? conversationBookings.find((booking) => booking.id === selectedBookingDetailId) ?? null
+        : null,
+    [conversationBookings, selectedBookingDetailId]
   );
 
   const isImmobilier = createForm.type === "immobilier";
@@ -1927,6 +1957,28 @@ export default function Dashboard() {
     );
   };
 
+  const refreshBookings = useCallback(async () => {
+    if (!token) {
+      setMyBookings([]);
+      setHostBookings([]);
+      return;
+    }
+
+    try {
+      const bookings = await getMyBookingsApi(token);
+      setMyBookings(bookings);
+
+      if (isHost) {
+        const received = await getReceivedBookingsApi(token);
+        setHostBookings(received);
+      } else {
+        setHostBookings([]);
+      }
+    } catch {
+      // Ignore background booking refresh errors.
+    }
+  }, [isHost, token]);
+
   const onConfirmBooking = async (bookingId: number) => {
     if (!token) {
       return;
@@ -2000,6 +2052,32 @@ export default function Dashboard() {
     }
   }, [refreshNotifications, token]);
 
+  const openNotificationDetails = useCallback(
+    async (notification: ApiNotification) => {
+      if (!token) {
+        return;
+      }
+      setActiveTab("reservations");
+      setMessagesView("notifications");
+      setIsConversationFocused(false);
+
+      if (notification.booking_id) {
+        setSelectedBookingDetailId(notification.booking_id);
+        await refreshBookings();
+      }
+
+      if (!notification.is_read) {
+        try {
+          await markNotificationReadApi(token, notification.id);
+          await refreshNotifications();
+        } catch {
+          // Ignore notification click-read errors in UI.
+        }
+      }
+    },
+    [refreshBookings, refreshNotifications, token]
+  );
+
   const onSendMessage = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!token || !selectedConversationBookingId) {
@@ -2014,7 +2092,7 @@ export default function Dashboard() {
     setSendingMessage(true);
     try {
       const sent = await sendBookingMessageApi(token, selectedConversationBookingId, content);
-      setBookingMessages((current) => [...current, sent]);
+      setBookingMessages((current) => sortByCreatedAtDesc([...current, sent]));
       setMessageDraft("");
       setMessageActionMessage(tr("Message envoye."));
       await refreshNotifications();
@@ -2115,42 +2193,45 @@ export default function Dashboard() {
         <div ref={tabsAnchorRef}>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList
-              className="w-full mb-8 rounded-2xl p-1 flex-wrap h-auto border border-border"
-              style={{
-                background: "rgba(255,255,255,0.85)",
-                backdropFilter: "blur(12px)",
-                boxShadow: "0 10px 15px -3px rgba(0,0,0,0.08)"
-              }}
+              className="w-full mb-8 rounded-2xl p-1 flex-wrap h-auto border border-border dark:border-white/10"
+              style={dashboardTabsListStyle}
             >
               <TabsTrigger
                 value="reservations"
-                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md"
+                className={`rounded-xl flex items-center gap-2 flex-1 transition-all ${dashboardTabTextClass} dark:data-[state=active]:!text-black data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md`}
+                style={{ color: "#000000", opacity: 1 }}
               >
                 <Calendar className="w-4 h-4" />
                 <span className="hidden sm:inline">{tr("Reservations")}</span>
               </TabsTrigger>
               <TabsTrigger
                 value="annonces"
-                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md"
+                className={`rounded-xl flex items-center gap-2 flex-1 transition-all ${dashboardTabTextClass} dark:data-[state=active]:!text-black data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md`}
+                style={{ color: "#000000", opacity: 1 }}
               >
                 <MapPin className="w-4 h-4" />
                 <span className="hidden sm:inline">{tr("Ajouter une annonce")}</span>
               </TabsTrigger>
               <TabsTrigger
                 value="messages"
-                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md"
+                className={`rounded-xl flex items-center gap-2 flex-1 transition-all ${dashboardTabTextClass} dark:data-[state=active]:!text-black data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md`}
+                style={{ color: "#000000", opacity: 1 }}
               >
                 <MessageCircle className="w-4 h-4" />
                 <span className="hidden sm:inline">{tr("Messages")}</span>
                 {unreadNotificationsCount > 0 && (
-                  <span className="ml-1 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white animate-pulse">
+                  <span
+                    className="ml-1 rounded-full bg-red-500 px-2 py-0.5 text-xs animate-pulse"
+                    style={{ color: "#000000" }}
+                  >
                     {unreadNotificationsCount}
                   </span>
                 )}
               </TabsTrigger>
               <TabsTrigger
                 value="profil"
-                className="rounded-xl flex items-center gap-2 flex-1 transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md"
+                className={`rounded-xl flex items-center gap-2 flex-1 transition-all ${dashboardTabTextClass} dark:data-[state=active]:!text-black data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md`}
+                style={{ color: "#000000", opacity: 1 }}
               >
                 <Settings className="w-4 h-4" />
                 <span className="hidden sm:inline">{tr("Parametre")}</span>
@@ -2159,6 +2240,81 @@ export default function Dashboard() {
 
             <TabsContent value="reservations">
               <div className="space-y-8">
+                {selectedBookingDetail && (
+                  <div className="overflow-hidden rounded-3xl border border-primary/20 bg-white shadow-md">
+                    <div
+                      className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+                      style={{ background: "linear-gradient(180deg, rgba(0,166,166,0.08) 0%, rgba(255,255,255,0) 100%)" }}
+                    >
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-primary/80">{tr("Reservation")}</p>
+                        <h2 className="text-xl font-bold">
+                          {selectedBookingDetail.listing_title ?? tr("Annonce #{id}", { id: selectedBookingDetail.listing_id })}
+                        </h2>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="rounded-full self-start sm:self-auto"
+                        onClick={() => setSelectedBookingDetailId(null)}
+                      >
+                        {tr("Annuler")}
+                      </Button>
+                    </div>
+                    <div className="grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-3">
+                      <div className="rounded-2xl bg-slate-50 p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">ID</p>
+                        <p className="mt-1 text-sm font-semibold">#{selectedBookingDetail.id}</p>
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tr("Statut")}</p>
+                        <p className="mt-1 text-sm font-semibold">{formatBookingStatus(selectedBookingDetail.status)}</p>
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tr("Prix")}</p>
+                        <p className="mt-1 text-sm font-semibold">{formatDza(selectedBookingDetail.total_price)}</p>
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tr("Dates")}</p>
+                        <p className="mt-1 text-sm font-semibold">
+                          {tr("Du {start} au {end}", {
+                            start: formatDate(selectedBookingDetail.start_date),
+                            end: formatDate(selectedBookingDetail.end_date),
+                          })}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tr("Localisation")}</p>
+                        <p className="mt-1 text-sm font-semibold">{selectedBookingDetail.listing_location ?? "-"}</p>
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tr("Client")}</p>
+                        <p className="mt-1 text-sm font-semibold">
+                          {selectedBookingDetail.requester_full_name ?? selectedBookingDetail.requester_email ?? tr("Utilisateur #{id}", { id: selectedBookingDetail.user_id })}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tr("Hote")}</p>
+                        <p className="mt-1 text-sm font-semibold">
+                          {selectedBookingDetail.host_full_name ?? tr("Utilisateur #{id}", { id: selectedBookingDetail.host_id ?? selectedBookingDetail.user_id })}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tr("Annonce")}</p>
+                        <p className="mt-1 text-sm font-semibold">
+                          {selectedBookingDetail.listing_title ?? tr("Annonce #{id}", { id: selectedBookingDetail.listing_id })}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tr("Quantite reservee")}</p>
+                        <p className="mt-1 text-sm font-semibold">
+                          {selectedBookingDetail.seats_reserved ?? selectedBookingDetail.rooms_reserved ?? selectedBookingDetail.guests_reserved ?? "-"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <h2 className="text-xl font-bold mb-4">{tr("Mes reservations (client)")}</h2>
                   {bookingActionMessage && (
@@ -3064,10 +3220,19 @@ export default function Dashboard() {
                           {tr("Aucune notification.")}
                         </div>
                       ) : (
-                        notifications.map((notification) => (
+                        sortedNotifications.map((notification) => (
                           <div
                             key={notification.id}
-                            className={`rounded-2xl border p-3 shadow-sm transition-colors ${notification.is_read
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => void openNotificationDetails(notification)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                void openNotificationDetails(notification);
+                              }
+                            }}
+                            className={`w-full rounded-2xl border p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 ${notification.is_read
                               ? "border-border bg-white"
                               : "border-primary/30 bg-gradient-to-r from-primary/10 to-white"
                               }`}
@@ -3087,7 +3252,10 @@ export default function Dashboard() {
                                       size="sm"
                                       variant="outline"
                                       className="h-7 rounded-full px-2 text-xs"
-                                      onClick={() => void onMarkNotificationRead(notification.id)}
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        void onMarkNotificationRead(notification.id);
+                                      }}
                                     >
                                       {tr("Lu")}
                                     </Button>
@@ -3198,29 +3366,38 @@ export default function Dashboard() {
                           <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
                             {loadingMessages ? (
                               <p className="py-6 text-center text-sm text-muted-foreground">{tr("Chargement des messages...")}</p>
-                            ) : bookingMessages.length === 0 ? (
+                            ) : sortedBookingMessages.length === 0 ? (
                               <div className="rounded-2xl border border-dashed border-border bg-white p-6 text-center text-sm text-muted-foreground">
                                 {tr("Aucun message pour cette reservation. Envoyez le premier message.")}
                               </div>
                             ) : (
-                              bookingMessages.map((message) => {
+                              sortedBookingMessages.map((message) => {
                                 const isMine = message.sender_id === user?.id;
                                 return (
                                   <div key={message.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                                     <div
                                       className={`max-w-[92%] rounded-3xl border px-4 py-3 text-sm shadow-sm sm:max-w-[80%] ${isMine
-                                        ? "border-[#3A6080]/30 bg-gradient-to-br from-[#3A6080] to-[#5481A0] text-white"
+                                        ? "border-[#3A6080]/30 bg-[#5481A0] text-white"
                                         : "border-slate-200 bg-white text-foreground"
                                         }`}
+                                      style={isMine ? { backgroundColor: "#5481A0", color: "#FFFFFF", borderColor: "rgba(58,96,128,0.30)" } : undefined}
                                     >
-                                      <div className={`mb-2 flex items-center gap-2 text-[11px] ${isMine ? "text-white/80" : "text-muted-foreground"}`}>
+                                      <div
+                                        className={`mb-2 flex items-center gap-2 text-[11px] ${isMine ? "text-white/80" : "text-muted-foreground"}`}
+                                        style={isMine ? { color: "rgba(255,255,255,0.80)" } : undefined}
+                                      >
                                         <span className="font-semibold">
                                           {isMine ? tr("Vous") : message.sender_name ?? tr("Interlocuteur")}
                                         </span>
-                                        <span className={`h-1 w-1 rounded-full ${isMine ? "bg-white/70" : "bg-slate-300"}`} />
+                                        <span
+                                          className={`h-1 w-1 rounded-full ${isMine ? "bg-white/70" : "bg-slate-300"}`}
+                                          style={isMine ? { backgroundColor: "rgba(255,255,255,0.70)" } : undefined}
+                                        />
                                         <span>{formatDateTime(message.created_at)}</span>
                                       </div>
-                                      <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                                      <p className="whitespace-pre-wrap leading-relaxed" style={isMine ? { color: "#FFFFFF" } : undefined}>
+                                        {message.content}
+                                      </p>
                                     </div>
                                   </div>
                                 );

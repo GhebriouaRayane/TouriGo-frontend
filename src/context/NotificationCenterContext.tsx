@@ -17,6 +17,12 @@ const NotificationCenterContext = createContext<NotificationCenterContextValue |
 
 const NOTIFICATION_POLL_INTERVAL_MS = 15000;
 
+function sortByCreatedAtDesc<T extends { created_at: string }>(items: T[]) {
+  return [...items].sort(
+    (left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime()
+  );
+}
+
 export function NotificationCenterProvider({ children }: { children: React.ReactNode }) {
   const { token } = useAuth();
   const [notifications, setNotifications] = useState<ApiNotification[]>([]);
@@ -58,7 +64,7 @@ export function NotificationCenterProvider({ children }: { children: React.React
         });
       }
 
-      setNotifications(freshNotifications);
+      setNotifications(sortByCreatedAtDesc(freshNotifications));
       knownNotificationIdsRef.current = nextKnownIds;
       hasLoadedOnceRef.current = true;
     } catch {
