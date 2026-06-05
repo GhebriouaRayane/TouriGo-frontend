@@ -49,7 +49,8 @@ export function NotificationCenterProvider({ children }: { children: React.React
         const newUnreadNotifications = freshNotifications
           .filter(
             (notification) =>
-              !notification.is_read && !knownNotificationIdsRef.current.has(notification.id)
+              !notification.is_read &&
+              !knownNotificationIdsRef.current.has(notification.id)
           )
           .sort(
             (left, right) =>
@@ -98,7 +99,9 @@ export function NotificationCenterProvider({ children }: { children: React.React
     () => ({
       notifications,
       loadingNotifications,
-      unreadNotificationsCount: notifications.filter((notification) => !notification.is_read).length,
+      unreadNotificationsCount: notifications.filter(
+        (notification) => !notification.is_read
+      ).length,
       refreshNotifications,
     }),
     [loadingNotifications, notifications, refreshNotifications]

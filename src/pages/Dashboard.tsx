@@ -39,7 +39,7 @@ import {
 } from "../lib/api";
 import { formatListingRating } from "../lib/listingRatings";
 import { makeTranslator } from "../i18n/localize";
-import { Bell, Calendar, Check, Heart, MapPin, MessageCircle, Plus, SendHorizontal, Settings, Star, X } from "lucide-react";
+import { Bell, Calendar, Check, ChevronLeft, Heart, MapPin, MessageCircle, Plus, SendHorizontal, Settings, Star, X } from "lucide-react";
 
 function sortByCreatedAtDesc<T extends { created_at: string }>(items: T[]) {
   return [...items].sort(
@@ -789,7 +789,6 @@ export default function Dashboard() {
   });
   const { user, token, refreshMe, logout } = useAuth();
   const { notifications, loadingNotifications, unreadNotificationsCount, refreshNotifications } = useNotificationCenter();
-  const sortedNotifications = useMemo(() => sortByCreatedAtDesc(notifications), [notifications]);
 
   const [profileForm, setProfileForm] = useState({
     email: "",
@@ -850,6 +849,42 @@ export default function Dashboard() {
     return tr(key);
   };
 
+  const refreshConversationData = useCallback(async () => {
+    if (!token) {
+      setMyBookings([]);
+      setHostBookings([]);
+      setLoadingBookings(false);
+      setLoadingHostBookings(false);
+      return;
+    }
+
+    setLoadingBookings(true);
+    try {
+      const bookings = await getMyBookingsApi(token);
+      setMyBookings(bookings);
+    } catch {
+      setMyBookings([]);
+    } finally {
+      setLoadingBookings(false);
+    }
+
+    if (!isHost) {
+      setHostBookings([]);
+      setLoadingHostBookings(false);
+      return;
+    }
+
+    setLoadingHostBookings(true);
+    try {
+      const bookings = await getReceivedBookingsApi(token);
+      setHostBookings(bookings);
+    } catch {
+      setHostBookings([]);
+    } finally {
+      setLoadingHostBookings(false);
+    }
+  }, [isHost, token]);
+
   useEffect(() => {
     void refreshMe();
   }, [refreshMe]);
@@ -892,63 +927,8 @@ export default function Dashboard() {
   }, [token]);
 
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      if (!token) {
-        setLoadingBookings(false);
-        return;
-      }
-      setLoadingBookings(true);
-      try {
-        const bookings = await getMyBookingsApi(token);
-        if (mounted) {
-          setMyBookings(bookings);
-        }
-      } catch {
-        if (mounted) {
-          setMyBookings([]);
-        }
-      } finally {
-        if (mounted) {
-          setLoadingBookings(false);
-        }
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [token]);
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      if (!token || !isHost) {
-        if (mounted) {
-          setHostBookings([]);
-          setLoadingHostBookings(false);
-        }
-        return;
-      }
-      setLoadingHostBookings(true);
-      try {
-        const bookings = await getReceivedBookingsApi(token);
-        if (mounted) {
-          setHostBookings(bookings);
-        }
-      } catch {
-        if (mounted) {
-          setHostBookings([]);
-        }
-      } finally {
-        if (mounted) {
-          setLoadingHostBookings(false);
-        }
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [isHost, token]);
+    void refreshConversationData();
+  }, [refreshConversationData]);
 
   useEffect(() => {
     let mounted = true;
@@ -1052,27 +1032,22 @@ export default function Dashboard() {
       return;
     }
     const intervalId = window.setInterval(() => {
-      void (async () => {
-        try {
-          const bookings = await getMyBookingsApi(token);
-          setMyBookings(bookings);
-          if (isHost) {
-            const received = await getReceivedBookingsApi(token);
-            setHostBookings(received);
-          }
-          if (selectedConversationBookingId) {
+      void refreshConversationData();
+      if (selectedConversationBookingId) {
+        void (async () => {
+          try {
             const messages = await getBookingMessagesApi(token, selectedConversationBookingId);
             setBookingMessages(messages);
+          } catch {
+            // Ignore background refresh errors.
           }
-        } catch {
-          // Ignore background refresh errors.
-        }
-      })();
+        })();
+      }
     }, 15000);
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [isHost, selectedConversationBookingId, token]);
+  }, [refreshConversationData, selectedConversationBookingId, token]);
 
   const formatDza = (value: number) => `${new Intl.NumberFormat(locale).format(Math.round(value))} DA`;
   const formatDate = (value: string) => new Date(value).toLocaleDateString(locale);
@@ -1957,28 +1932,6 @@ export default function Dashboard() {
     );
   };
 
-  const refreshBookings = useCallback(async () => {
-    if (!token) {
-      setMyBookings([]);
-      setHostBookings([]);
-      return;
-    }
-
-    try {
-      const bookings = await getMyBookingsApi(token);
-      setMyBookings(bookings);
-
-      if (isHost) {
-        const received = await getReceivedBookingsApi(token);
-        setHostBookings(received);
-      } else {
-        setHostBookings([]);
-      }
-    } catch {
-      // Ignore background booking refresh errors.
-    }
-  }, [isHost, token]);
-
   const onConfirmBooking = async (bookingId: number) => {
     if (!token) {
       return;
@@ -2063,7 +2016,7 @@ export default function Dashboard() {
 
       if (notification.booking_id) {
         setSelectedBookingDetailId(notification.booking_id);
-        await refreshBookings();
+        await refreshConversationData();
       }
 
       if (!notification.is_read) {
@@ -2075,7 +2028,7 @@ export default function Dashboard() {
         }
       }
     },
-    [refreshBookings, refreshNotifications, token]
+    [refreshConversationData, refreshNotifications, token]
   );
 
   const onSendMessage = async (event: FormEvent<HTMLFormElement>) => {
@@ -3201,16 +3154,18 @@ export default function Dashboard() {
                           </span>
                         )}
                       </div>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="rounded-full"
-                        onClick={() => void onMarkAllNotificationsRead()}
-                        disabled={notifications.length === 0 || unreadNotificationsCount === 0}
-                      >
-                        {tr("Tout lire")}
-                      </Button>
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="rounded-full"
+                          onClick={() => void onMarkAllNotificationsRead()}
+                          disabled={notifications.length === 0 || unreadNotificationsCount === 0}
+                        >
+                          {tr("Tout lire")}
+                        </Button>
+                      </div>
                     </div>
                     <div className="max-h-[620px] space-y-2 overflow-y-auto bg-slate-50/40 p-3">
                       {loadingNotifications ? (
@@ -3220,7 +3175,7 @@ export default function Dashboard() {
                           {tr("Aucune notification.")}
                         </div>
                       ) : (
-                        sortedNotifications.map((notification) => (
+                        notifications.map((notification) => (
                           <div
                             key={notification.id}
                             role="button"
@@ -3274,15 +3229,17 @@ export default function Dashboard() {
                   <div className="overflow-hidden rounded-3xl border border-border bg-white shadow-md">
                     {!isConversationFocused ? (
                       <div className="min-h-[620px] bg-slate-50/40">
-                        <div className="border-b border-border px-4 py-3">
-                          <div className="flex items-center justify-between gap-2">
+                      <div className="border-b border-border px-4 py-3">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="flex items-center gap-2">
                             <h3 className="font-semibold">{tr("Messagerie reservation")}</h3>
                             <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700">
                               {conversationBookings.length}
                             </span>
                           </div>
                         </div>
-                        <div className="max-h-[560px] space-y-2 overflow-y-auto p-3">
+                      </div>
+                      <div className="max-h-[560px] space-y-2 overflow-y-auto p-3">
                           {conversationBookings.length === 0 ? (
                             <div className="rounded-2xl border border-dashed border-border bg-white p-4 text-sm text-muted-foreground">
                               {tr("Aucune conversation")}
@@ -3291,40 +3248,52 @@ export default function Dashboard() {
                             conversationBookings.map((booking) => {
                               const isSelected = booking.id === selectedConversationBookingId;
                               return (
-                                <button
+                                <div
                                   key={booking.id}
-                                  type="button"
+                                  role="button"
+                                  tabIndex={0}
                                   onClick={() => {
                                     setSelectedConversationBookingId(booking.id);
                                     setIsConversationFocused(true);
+                                  }}
+                                  onKeyDown={(event) => {
+                                    if (event.key === "Enter" || event.key === " ") {
+                                      event.preventDefault();
+                                      setSelectedConversationBookingId(booking.id);
+                                      setIsConversationFocused(true);
+                                    }
                                   }}
                                   className={`w-full rounded-2xl border px-3 py-3 text-left transition-all ${isSelected
                                     ? "border-primary/40 bg-primary/10 shadow-sm"
                                     : "border-border bg-white hover:border-primary/30 hover:bg-primary/5"
                                     }`}
                                 >
-                                  <p className="line-clamp-1 text-sm font-semibold">
-                                    {booking.listing_title ?? tr("Annonce #{id}", { id: booking.listing_id })}
-                                  </p>
-                                  <p className="mt-1 text-xs text-muted-foreground">
-                                    {tr("Du {start} au {end}", {
-                                      start: formatDate(booking.start_date),
-                                      end: formatDate(booking.end_date),
-                                    })}
-                                  </p>
-                                  <div className="mt-2 flex items-center justify-between gap-2">
-                                    <span
-                                      className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${bookingStatusBadgeClass(
-                                        booking.status
-                                      )}`}
-                                    >
-                                      {formatBookingStatus(booking.status)}
-                                    </span>
-                                    <span className="text-xs font-semibold text-muted-foreground">
-                                      {formatDza(booking.total_price)}
-                                    </span>
+                                  <div className="flex items-start gap-3">
+                                    <div className="min-w-0 flex-1">
+                                      <p className="line-clamp-1 text-sm font-semibold">
+                                        {booking.listing_title ?? tr("Annonce #{id}", { id: booking.listing_id })}
+                                      </p>
+                                      <p className="mt-1 text-xs text-muted-foreground">
+                                        {tr("Du {start} au {end}", {
+                                          start: formatDate(booking.start_date),
+                                          end: formatDate(booking.end_date),
+                                        })}
+                                      </p>
+                                      <div className="mt-2 flex items-center justify-between gap-2">
+                                        <span
+                                          className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${bookingStatusBadgeClass(
+                                            booking.status
+                                          )}`}
+                                        >
+                                          {formatBookingStatus(booking.status)}
+                                        </span>
+                                        <span className="text-xs font-semibold text-muted-foreground">
+                                          {formatDza(booking.total_price)}
+                                        </span>
+                                      </div>
+                                    </div>
                                   </div>
-                                </button>
+                                </div>
                               );
                             })
                           )}

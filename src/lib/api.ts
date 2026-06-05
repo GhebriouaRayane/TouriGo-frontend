@@ -726,7 +726,9 @@ export function cancelBookingApi(token: string, bookingId: number) {
 }
 
 export function getNotificationsApi(token: string, limit = 50) {
-  return request<ApiNotification[]>(`/notifications/me?limit=${limit}`, { token });
+  const params = new URLSearchParams();
+  params.set("limit", String(limit));
+  return request<ApiNotification[]>(`/notifications/me?${params.toString()}`, { token });
 }
 
 export function markNotificationReadApi(token: string, notificationId: number) {

@@ -104,7 +104,8 @@ const DETAIL_TRANSLATIONS = {
     "Participants label": "Participants",
     "Arrivee": "Check-in",
     "Depart label": "Check-out",
-    "Chambres label": "Rooms",
+    "Nuits sélectionnées": "Selected nights",
+    "{count} nuit(s)": "{count} night(s)",
     "Personnes": "People",
     "Disponibilite": "Availability",
     "chambre(s)": "room(s)",
@@ -221,7 +222,8 @@ const DETAIL_TRANSLATIONS = {
     "Participants label": "المشاركون",
     "Arrivee": "الوصول",
     "Depart label": "المغادرة",
-    "Chambres label": "الغرف",
+    "Nuits sélectionnées": "الليالي المحددة",
+    "{count} nuit(s)": "{count} ليلة",
     "Personnes": "الأشخاص",
     "Disponibilite": "التوفر",
     "chambre(s)": "غرفة/غرف",
@@ -896,7 +898,7 @@ export default function DetailAnnonce() {
     : isActivityListing
       ? bookingParticipantsRequested
       : isImmobilierListing
-        ? nights * bookingRoomsRequested
+        ? nights
         : nights;
   const total = Math.round(price * bookingUnits);
   const formatDza = (value: number) => `${new Intl.NumberFormat(locale).format(Math.round(value))} DA`;
@@ -1685,23 +1687,8 @@ export default function DetailAnnonce() {
                     {isImmobilierListing && (
                       <div className="grid grid-cols-2 gap-2">
                         <div className="border border-border rounded-xl p-3 bg-gray-50">
-                          <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{tr("Chambres label")}</label>
-                          <input
-                            type="number"
-                            min={1}
-                            max={immobilierRoomsCapacity ?? undefined}
-                            value={bookingRoomsRequested}
-                            onChange={(event) => {
-                              const parsed = Number(event.target.value);
-                              const normalized = Number.isFinite(parsed) ? Math.max(1, Math.floor(parsed)) : 1;
-                              setBookingRoomsRequested(
-                                immobilierRoomsCapacity !== null
-                                  ? Math.min(normalized, immobilierRoomsCapacity)
-                                  : normalized
-                              );
-                            }}
-                            className="w-full text-sm font-medium bg-transparent focus:outline-none"
-                          />
+                          <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{tr("Nuits sélectionnées")}</label>
+                          <span className="block text-sm font-medium">{tr("{count} nuit(s)", { count: nights })}</span>
                         </div>
                         <div className="border border-border rounded-xl p-3 bg-gray-50">
                           <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{tr("Personnes")}</label>
@@ -1767,16 +1754,7 @@ export default function DetailAnnonce() {
                           { price: formatDza(price), count: bookingParticipantsRequested }
                         )
                       : isImmobilierListing
-                        ? tr(
-                          nights > 1
-                            ? (bookingRoomsRequested > 1
-                              ? "{price} × {nights} nuits × {rooms} chambres"
-                              : "{price} × {nights} nuits × {rooms} chambre")
-                            : (bookingRoomsRequested > 1
-                              ? "{price} × {nights} nuit × {rooms} chambres"
-                              : "{price} × {nights} nuit × {rooms} chambre"),
-                          { price: formatDza(price), nights, rooms: bookingRoomsRequested }
-                        )
+                        ? tr("{price} × {nights} nuits", { price: formatDza(price), nights })
                         : tr("{price} × {nights} nuits", { price: formatDza(price), nights })}
                   </span>
                   <span className="font-medium">{formatDza(price * bookingUnits)}</span>
