@@ -100,6 +100,8 @@ const DASHBOARD_TRANSLATIONS = {
     "Ecrivez un message avant l'envoi.": "Write a message before sending.",
     "Message envoye.": "Message sent.",
     "Erreur lors de l'envoi du message.": "Error while sending message.",
+    "Dernier message": "Last message",
+    "Discussion sans message": "Conversation without messages",
     "Mon tableau de bord": "My dashboard",
     "Gere vos annonces, votre profil et vos interactions": "Manage your listings, profile, and interactions",
     "Devenir hote": "Become a host",
@@ -308,6 +310,8 @@ const DASHBOARD_TRANSLATIONS = {
     "Ecrivez un message avant l'envoi.": "اكتب رسالة قبل الإرسال.",
     "Message envoye.": "تم إرسال الرسالة.",
     "Erreur lors de l'envoi du message.": "حدث خطأ أثناء إرسال الرسالة.",
+    "Dernier message": "آخر رسالة",
+    "Discussion sans message": "محادثة بلا رسائل",
     "Mon tableau de bord": "لوحة التحكم الخاصة بي",
     "Gere vos annonces, votre profil et vos interactions": "أدر إعلاناتك وملفك الشخصي وتفاعلاتك",
     "Devenir hote": "أصبح مضيفًا",
@@ -758,6 +762,7 @@ export default function Dashboard() {
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [loadingHostBookings, setLoadingHostBookings] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [conversationLastMessageAtById, setConversationLastMessageAtById] = useState<Record<number, string>>({});
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
   const [deleteAccountMessage, setDeleteAccountMessage] = useState<string | null>(null);
@@ -885,6 +890,21 @@ export default function Dashboard() {
     }
   }, [isHost, token]);
 
+  const updateConversationLastMessageAt = useCallback((bookingId: number, messages: ApiMessage[]) => {
+    const lastMessage = messages[messages.length - 1];
+    setConversationLastMessageAtById((current) => {
+      if (!lastMessage) {
+        const next = { ...current };
+        delete next[bookingId];
+        return next;
+      }
+      return {
+        ...current,
+        [bookingId]: lastMessage.created_at,
+      };
+    });
+  }, []);
+
   useEffect(() => {
     void refreshMe();
   }, [refreshMe]);
@@ -964,9 +984,13 @@ export default function Dashboard() {
       byId.set(booking.id, booking);
     });
     return Array.from(byId.values()).sort(
-      (a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime()
+      (a, b) => {
+        const bLastActivity = conversationLastMessageAtById[b.id] ?? b.start_date;
+        const aLastActivity = conversationLastMessageAtById[a.id] ?? a.start_date;
+        return new Date(bLastActivity).getTime() - new Date(aLastActivity).getTime();
+      }
     );
-  }, [hostBookings, myBookings]);
+  }, [conversationLastMessageAtById, hostBookings, myBookings]);
 
   useEffect(() => {
     if (conversationBookings.length === 0) {
@@ -1002,6 +1026,11 @@ export default function Dashboard() {
       if (!token || !selectedConversationBookingId) {
         if (mounted) {
           setBookingMessages([]);
+          setConversationLastMessageAtById((current) => {
+            const next = { ...current };
+            delete next[selectedConversationBookingId ?? -1];
+            return next;
+          });
           setLoadingMessages(false);
         }
         return;
@@ -1011,10 +1040,16 @@ export default function Dashboard() {
         const data = await getBookingMessagesApi(token, selectedConversationBookingId);
         if (mounted) {
           setBookingMessages(data);
+          updateConversationLastMessageAt(selectedConversationBookingId, data);
         }
       } catch {
         if (mounted) {
           setBookingMessages([]);
+          setConversationLastMessageAtById((current) => {
+            const next = { ...current };
+            delete next[selectedConversationBookingId];
+            return next;
+          });
         }
       } finally {
         if (mounted) {
@@ -1025,7 +1060,48 @@ export default function Dashboard() {
     return () => {
       mounted = false;
     };
-  }, [selectedConversationBookingId, token]);
+  }, [selectedConversationBookingId, token, updateConversationLastMessageAt]);
+
+  useEffect(() => {
+    if (!token || messagesView !== "messages" || conversationBookings.length === 0) {
+      return;
+    }
+
+    let mounted = true;
+    void (async () => {
+      const updates = await Promise.all(
+        conversationBookings.map(async (booking) => {
+          try {
+            const messages = await getBookingMessagesApi(token, booking.id);
+            const lastMessage = messages[messages.length - 1];
+            return { bookingId: booking.id, createdAt: lastMessage?.created_at ?? null };
+          } catch {
+            return { bookingId: booking.id, createdAt: null };
+          }
+        })
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      setConversationLastMessageAtById((current) => {
+        const next = { ...current };
+        updates.forEach(({ bookingId, createdAt }) => {
+          if (createdAt) {
+            next[bookingId] = createdAt;
+          } else {
+            delete next[bookingId];
+          }
+        });
+        return next;
+      });
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [conversationBookings, messagesView, token]);
 
   useEffect(() => {
     if (!token) {
@@ -1038,6 +1114,7 @@ export default function Dashboard() {
           try {
             const messages = await getBookingMessagesApi(token, selectedConversationBookingId);
             setBookingMessages(messages);
+            updateConversationLastMessageAt(selectedConversationBookingId, messages);
           } catch {
             // Ignore background refresh errors.
           }
@@ -1051,8 +1128,16 @@ export default function Dashboard() {
 
   const formatDza = (value: number) => `${new Intl.NumberFormat(locale).format(Math.round(value))} DA`;
   const formatDate = (value: string) => new Date(value).toLocaleDateString(locale);
-  const formatDateTime = (value: string) =>
-    new Date(value).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" });
+  const formatExactDateTime = (value: string) =>
+    new Intl.DateTimeFormat(locale, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    }).format(new Date(value));
 
   const formatBookingStatus = (statusValue: ApiBooking["status"]) => {
     if (statusValue === "pending") return tr("En attente");
@@ -3200,7 +3285,12 @@ export default function Dashboard() {
                               </span>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-start justify-between gap-2">
-                                  <p className="text-sm font-semibold leading-5">{notification.title}</p>
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-semibold leading-5">{notification.title}</p>
+                                    <p className="mt-1 text-[11px] text-muted-foreground">
+                                      {formatExactDateTime(notification.created_at)}
+                                    </p>
+                                  </div>
                                   {!notification.is_read && (
                                     <Button
                                       type="button"
@@ -3217,7 +3307,6 @@ export default function Dashboard() {
                                   )}
                                 </div>
                                 <p className="mt-1 text-sm text-muted-foreground">{notification.body}</p>
-                                <p className="mt-2 text-xs text-muted-foreground">{formatDateTime(notification.created_at)}</p>
                               </div>
                             </div>
                           </div>
@@ -3270,9 +3359,20 @@ export default function Dashboard() {
                                 >
                                   <div className="flex items-start gap-3">
                                     <div className="min-w-0 flex-1">
-                                      <p className="line-clamp-1 text-sm font-semibold">
-                                        {booking.listing_title ?? tr("Annonce #{id}", { id: booking.listing_id })}
-                                      </p>
+                                      <div className="flex items-start justify-between gap-2">
+                                        <p className="line-clamp-1 text-sm font-semibold">
+                                          {booking.listing_title ?? tr("Annonce #{id}", { id: booking.listing_id })}
+                                        </p>
+                                        {conversationLastMessageAtById[booking.id] ? (
+                                          <span className="shrink-0 text-[11px] font-medium text-muted-foreground">
+                                            {formatExactDateTime(conversationLastMessageAtById[booking.id])}
+                                          </span>
+                                        ) : (
+                                          <span className="shrink-0 text-[11px] font-medium text-muted-foreground">
+                                            {tr("Discussion sans message")}
+                                          </span>
+                                        )}
+                                      </div>
                                       <p className="mt-1 text-xs text-muted-foreground">
                                         {tr("Du {start} au {end}", {
                                           start: formatDate(booking.start_date),
@@ -3362,7 +3462,7 @@ export default function Dashboard() {
                                           className={`h-1 w-1 rounded-full ${isMine ? "bg-white/70" : "bg-slate-300"}`}
                                           style={isMine ? { backgroundColor: "rgba(255,255,255,0.70)" } : undefined}
                                         />
-                                        <span>{formatDateTime(message.created_at)}</span>
+                                        <span>{formatExactDateTime(message.created_at)}</span>
                                       </div>
                                       <p className="whitespace-pre-wrap leading-relaxed" style={isMine ? { color: "#FFFFFF" } : undefined}>
                                         {message.content}
