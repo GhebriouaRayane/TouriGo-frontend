@@ -104,6 +104,15 @@ const DASHBOARD_TRANSLATIONS = {
     "Discussion sans message": "Conversation without messages",
     "Mon tableau de bord": "My dashboard",
     "Gere vos annonces, votre profil et vos interactions": "Manage your listings, profile, and interactions",
+    "Statistiques hote": "Host statistics",
+    "Demandes recues": "Received requests",
+    "Demandes en attente": "Pending requests",
+    "Demandes confirmees": "Confirmed requests",
+    "Revenu exact": "Exact revenue",
+    "Note moyenne": "Average rating",
+    "Fermer les statistiques": "Hide statistics",
+    "Ouvrir les statistiques": "Show statistics",
+    "Revenu calcule sur les reservations confirmees ou terminees.": "Revenue calculated from confirmed or completed bookings.",
     "Devenir hote": "Become a host",
     "Reservations": "Bookings",
     "Mes annonces": "My listings",
@@ -314,6 +323,15 @@ const DASHBOARD_TRANSLATIONS = {
     "Discussion sans message": "محادثة بلا رسائل",
     "Mon tableau de bord": "لوحة التحكم الخاصة بي",
     "Gere vos annonces, votre profil et vos interactions": "أدر إعلاناتك وملفك الشخصي وتفاعلاتك",
+    "Statistiques hote": "إحصائيات المضيف",
+    "Demandes recues": "الطلبات المستلمة",
+    "Demandes en attente": "الطلبات المعلقة",
+    "Demandes confirmees": "الطلبات المؤكدة",
+    "Revenu exact": "الإيراد الدقيق",
+    "Note moyenne": "المعدل العام",
+    "Fermer les statistiques": "إخفاء الإحصائيات",
+    "Ouvrir les statistiques": "إظهار الإحصائيات",
+    "Revenu calcule sur les reservations confirmees ou terminees.": "يُحسب الإيراد من الحجوزات المؤكدة أو المكتملة.",
     "Devenir hote": "أصبح مضيفًا",
     "Reservations": "الحجوزات",
     "Mes annonces": "إعلاناتي",
@@ -748,6 +766,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("reservations");
   const tabsAnchorRef = useRef<HTMLDivElement | null>(null);
   const myListingsSectionRef = useRef<HTMLDivElement | null>(null);
+  const hostRequestsSectionRef = useRef<HTMLDivElement | null>(null);
   const [myListings, setMyListings] = useState<ApiListing[]>([]);
   const [favoriteListings, setFavoriteListings] = useState<ApiListing[]>([]);
   const [myBookings, setMyBookings] = useState<ApiBooking[]>([]);
@@ -783,6 +802,7 @@ export default function Dashboard() {
   const [cancellingBookingId, setCancellingBookingId] = useState<number | null>(null);
   const [listingFiles, setListingFiles] = useState<File[]>([]);
   const [editingListingId, setEditingListingId] = useState<number | null>(null);
+  const [showHostStats, setShowHostStats] = useState(true);
   const [editListingForm, setEditListingForm] = useState({
     title: "",
     description: "",
@@ -1195,6 +1215,32 @@ export default function Dashboard() {
         : null,
     [conversationBookings, selectedBookingDetailId]
   );
+
+  const hostStats = useMemo(() => {
+    const receivedRequests = hostBookings.length;
+    const pendingRequests = hostBookings.filter((booking) => booking.status === "pending").length;
+    const confirmedRequests = hostBookings.filter(
+      (booking) => booking.status === "confirmed" || booking.status === "completed"
+    ).length;
+    const exactRevenue = hostBookings
+      .filter((booking) => booking.status === "confirmed" || booking.status === "completed")
+      .reduce((sum, booking) => sum + booking.total_price, 0);
+    const ratedListings = myListings.filter((listing) => listing.rating_average !== null && listing.rating_count > 0);
+    const ratingWeight = ratedListings.reduce((sum, listing) => sum + listing.rating_count, 0);
+    const weightedRating = ratedListings.reduce(
+      (sum, listing) => sum + (listing.rating_average ?? 0) * listing.rating_count,
+      0
+    );
+
+    return {
+      publishedListings: myListings.length,
+      receivedRequests,
+      pendingRequests,
+      confirmedRequests,
+      exactRevenue,
+      averageRating: ratingWeight > 0 ? weightedRating / ratingWeight : null,
+    };
+  }, [hostBookings, myListings]);
 
   const isImmobilier = createForm.type === "immobilier";
   const isVehicule = createForm.type === "vehicule";
@@ -2155,6 +2201,21 @@ export default function Dashboard() {
     });
   };
 
+  const scrollToHostRequestsSection = useCallback(() => {
+    hostRequestsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const onOpenHostRequests = useCallback(() => {
+    if (!isHost) {
+      return;
+    }
+    setActiveTab("reservations");
+    setShowHostStats(true);
+    window.requestAnimationFrame(() => {
+      scrollToHostRequestsSection();
+    });
+  }, [isHost, scrollToHostRequestsSection]);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
@@ -2228,6 +2289,78 @@ export default function Dashboard() {
               <p className="mt-1 text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>{tr("Favoris")}</p>
             </button>
           </div>
+
+          {isHost && (
+            <div className="relative mt-4 flex justify-end" style={{ zIndex: 10 }}>
+              <button
+                type="button"
+                onClick={() => setShowHostStats((current) => !current)}
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/15"
+              >
+                <ChevronLeft
+                  className={`h-4 w-4 transition-transform ${showHostStats ? "rotate-90" : "-rotate-90"}`}
+                />
+                {tr(showHostStats ? "Fermer les statistiques" : "Ouvrir les statistiques")}
+              </button>
+            </div>
+          )}
+
+          {isHost && showHostStats && (
+            <div
+              className="relative mt-6 overflow-hidden rounded-3xl border border-white/10 bg-white/10 p-4 sm:p-6 backdrop-blur-md"
+              style={{ zIndex: 10 }}
+            >
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "rgba(255,255,255,0.65)" }}>
+                    {tr("Statistiques hote")}
+                  </p>
+                  <h2 className="mt-1 text-lg font-bold text-white">{tr("Statistiques hote")}</h2>
+                </div>
+                <div className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-medium text-white/80">
+                  {tr("Hote")}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+                <button
+                  type="button"
+                  onClick={onOpenHostRequests}
+                  className="rounded-2xl border border-white/10 bg-white/15 p-4 text-left shadow-[0_12px_28px_rgba(0,0,0,0.12)] transition-transform hover:-translate-y-0.5 hover:bg-white/20"
+                >
+                  <p className="text-xs uppercase tracking-wide text-white/60">{tr("Demandes recues")}</p>
+                  <p className="mt-2 text-3xl font-bold text-white">{hostStats.receivedRequests}</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={onOpenHostRequests}
+                  className="rounded-2xl border border-white/10 bg-white/15 p-4 text-left shadow-[0_12px_28px_rgba(0,0,0,0.12)] transition-transform hover:-translate-y-0.5 hover:bg-white/20"
+                >
+                  <p className="text-xs uppercase tracking-wide text-white/60">{tr("Demandes en attente")}</p>
+                  <p className="mt-2 text-3xl font-bold text-white">{hostStats.pendingRequests}</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={onOpenHostRequests}
+                  className="rounded-2xl border border-white/10 bg-white/15 p-4 text-left shadow-[0_12px_28px_rgba(0,0,0,0.12)] transition-transform hover:-translate-y-0.5 hover:bg-white/20"
+                >
+                  <p className="text-xs uppercase tracking-wide text-white/60">{tr("Demandes confirmees")}</p>
+                  <p className="mt-2 text-3xl font-bold text-white">{hostStats.confirmedRequests}</p>
+                </button>
+                <div className="rounded-2xl border border-white/10 bg-white/15 p-4 shadow-[0_12px_28px_rgba(0,0,0,0.12)]">
+                  <p className="text-xs uppercase tracking-wide text-white/60">{tr("Revenu exact")}</p>
+                  <p className="mt-2 text-2xl font-bold text-white">{formatDza(hostStats.exactRevenue)}</p>
+                  <p className="mt-1 text-[11px] text-white/50">{tr("Revenu calcule sur les reservations confirmees ou terminees.")}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/15 p-4 shadow-[0_12px_28px_rgba(0,0,0,0.12)]">
+                  <p className="text-xs uppercase tracking-wide text-white/60">{tr("Note moyenne")}</p>
+                  <p className="mt-2 text-3xl font-bold text-white">
+                    {hostStats.averageRating !== null ? hostStats.averageRating.toFixed(1) : "—"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
 
         <div ref={tabsAnchorRef}>
@@ -2416,7 +2549,7 @@ export default function Dashboard() {
                 </div>
 
                 {isHost && (
-                  <div>
+                  <div ref={hostRequestsSectionRef}>
                     <h2 className="text-xl font-bold mb-4">{tr("Demandes recues (hote)")}</h2>
                     {loadingHostBookings ? (
                       <div className="py-8 text-center text-muted-foreground">{tr("Chargement des demandes recues...")}</div>
