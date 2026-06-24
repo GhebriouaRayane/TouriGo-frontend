@@ -2197,16 +2197,18 @@ export default function Dashboard() {
             </div>
           </div>
           {/* Quick Stats Row */}
-          <div className="relative mt-6 grid grid-cols-3 gap-3 sm:gap-4" style={{ zIndex: 10 }}>
-            <button
-              type="button"
-              onClick={onOpenMyListings}
-              className="rounded-2xl p-3 sm:p-4 text-center transition-colors hover:bg-white/15"
-              style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(8px)" }}
-            >
-              <p className="text-2xl sm:text-3xl font-bold" style={{ color: "white" }}>{loadingListings ? "—" : myListings.length}</p>
-              <p className="mt-1 text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>{tr("Mes annonces")}</p>
-            </button>
+          <div className={`relative mt-6 grid gap-3 sm:gap-4 ${isHost ? "grid-cols-3" : "grid-cols-2"}`} style={{ zIndex: 10 }}>
+            {isHost && (
+              <button
+                type="button"
+                onClick={onOpenMyListings}
+                className="rounded-2xl p-3 sm:p-4 text-center transition-colors hover:bg-white/15"
+                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(8px)" }}
+              >
+                <p className="text-2xl sm:text-3xl font-bold" style={{ color: "white" }}>{loadingListings ? "—" : myListings.length}</p>
+                <p className="mt-1 text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>{tr("Mes annonces")}</p>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => onQuickAccess("reservations")}
@@ -2242,14 +2244,16 @@ export default function Dashboard() {
                 <Calendar className="w-4 h-4" />
                 <span className="hidden sm:inline">{tr("Reservations")}</span>
               </TabsTrigger>
-              <TabsTrigger
-                value="annonces"
-                className={`rounded-xl flex items-center gap-2 flex-1 transition-all ${dashboardTabTextClass} dark:data-[state=active]:!text-black data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md`}
-                style={{ color: "#000000", opacity: 1 }}
-              >
-                <MapPin className="w-4 h-4" />
-                <span className="hidden sm:inline">{tr("Ajouter une annonce")}</span>
-              </TabsTrigger>
+              {isHost && (
+                <TabsTrigger
+                  value="annonces"
+                  className={`rounded-xl flex items-center gap-2 flex-1 transition-all ${dashboardTabTextClass} dark:data-[state=active]:!text-black data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md`}
+                  style={{ color: "#000000", opacity: 1 }}
+                >
+                  <MapPin className="w-4 h-4" />
+                  <span className="hidden sm:inline">{tr("Ajouter une annonce")}</span>
+                </TabsTrigger>
+              )}
               <TabsTrigger
                 value="messages"
                 className={`rounded-xl flex items-center gap-2 flex-1 transition-all ${dashboardTabTextClass} dark:data-[state=active]:!text-black data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md`}
