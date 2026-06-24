@@ -18,6 +18,7 @@ import Activites from "./pages/Activites";
 import Dashboard from "./pages/Dashboard";
 import DetailAnnonce from "./pages/DetailAnnonce";
 import DevenirHote from "./pages/DevenirHote";
+import HostProfile from "./pages/HostProfile";
 import Immobilier from "./pages/Immobilier";
 import Resultats from "./pages/Resultats";
 import StaticPage from "./pages/StaticPage";
@@ -186,6 +187,7 @@ function AnimatedRoutes() {
           <Route path="/devenir-hote" element={<DevenirHote />} />
           <Route path="/resultats" element={<Resultats />} />
           <Route path="/detail/:id" element={<DetailAnnonce />} />
+          <Route path="/hote/:id" element={<HostProfile />} />
           <Route
             path="/admin"
             element={
@@ -248,7 +250,7 @@ export default function App() {
     <Router>
       <ScrollToTop />
       <AndroidHardwareBackButton />
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-transparent flex flex-col">
         <NavbarNew theme={theme} onToggleTheme={onToggleTheme} />
         <main className="flex-grow">
           <AnimatedRoutes />

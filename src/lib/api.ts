@@ -93,11 +93,16 @@ function normalizeMediaUrl(url: string): string {
 }
 
 function normalizeListing(listing: ApiListing): ApiListing {
+  const normalizedOwnerAvatar = listing.owner_avatar_url ? normalizeMediaUrl(listing.owner_avatar_url) : listing.owner_avatar_url;
   if (!listing.images?.length) {
-    return listing;
+    return {
+      ...listing,
+      owner_avatar_url: normalizedOwnerAvatar,
+    };
   }
   return {
     ...listing,
+    owner_avatar_url: normalizedOwnerAvatar,
     images: listing.images.map((image) => ({
       ...image,
       url: normalizeMediaUrl(image.url),
@@ -183,6 +188,14 @@ function normalizeUser(user: ApiUser): ApiUser {
   };
 }
 
+function normalizeHostProfile(profile: ApiHostProfile): ApiHostProfile {
+  return {
+    ...profile,
+    avatar_url: profile.avatar_url ? normalizeMediaUrl(profile.avatar_url) : profile.avatar_url,
+    listings: profile.listings.map(normalizeListing),
+  };
+}
+
 export type ApiUser = {
   id: number;
   email: string;
@@ -192,6 +205,17 @@ export type ApiUser = {
   role: string;
   is_active: boolean;
   created_at: string;
+};
+
+export type ApiHostProfile = {
+  id: number;
+  full_name: string | null;
+  avatar_url: string | null;
+  phone_number: string | null;
+  role: string;
+  rating_average: number | null;
+  rating_count: number;
+  listings: ApiListing[];
 };
 
 export type VerificationChannel = "email" | "phone";
@@ -237,6 +261,7 @@ export type ApiListing = {
   owner_id: number | null;
   owner_full_name: string | null;
   owner_phone_number: string | null;
+  owner_avatar_url: string | null;
   rating_average: number | null;
   rating_count: number;
   images: ApiImage[];
@@ -501,6 +526,10 @@ export function warmupApi() {
 
 export function getListingByIdApi(id: number) {
   return request<ApiListing>(`/listings/${id}`).then(normalizeListing);
+}
+
+export function getHostProfileApi(userId: number) {
+  return request<ApiHostProfile>(`/hosts/${userId}`).then(normalizeHostProfile);
 }
 
 export function getMyListingsApi(token: string) {

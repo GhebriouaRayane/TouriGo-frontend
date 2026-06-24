@@ -97,6 +97,7 @@ const DETAIL_TRANSLATIONS = {
     "Aucune date specifique renseignee par l'hote.": "No specific date provided by the host.",
     "Votre hote": "Your host",
     "Hote 3ich": "3ich host",
+    "Voir le profil": "View profile",
     "Profil verifie": "Verified profile",
     "Date et heure disponibles": "Available date and time",
     "Places a reserver": "Seats to book",
@@ -215,6 +216,7 @@ const DETAIL_TRANSLATIONS = {
     "Aucune date specifique renseignee par l'hote.": "لم يحدد المضيف تواريخ محددة.",
     "Votre hote": "مضيفك",
     "Hote 3ich": "مضيف 3ich",
+    "Voir le profil": "عرض الملف",
     "Profil verifie": "ملف موثّق",
     "Date et heure disponibles": "التاريخ والوقت المتاحان",
     "Places a reserver": "المقاعد المطلوب حجزها",
@@ -1572,16 +1574,53 @@ export default function DetailAnnonce() {
 
             <div>
               <h3 className="text-xl font-bold mb-6">{tr("Votre hote")}</h3>
-              <div className="flex items-center gap-4 bg-gray-50 p-6 rounded-2xl border border-border">
-                <Avatar className="w-16 h-16 border-2 border-white shadow-sm">
-                  <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Karim" />
-                  <AvatarFallback>KM</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h4 className="font-bold text-lg">{listing.owner_full_name ?? tr("Hote 3ich")}</h4>
-                  <p className="text-sm text-muted-foreground mb-2">{tr("Profil verifie")}</p>
+              {listing.owner_id ? (
+                <Link
+                  to={`/hote/${listing.owner_id}`}
+                  className="group flex items-center gap-4 bg-gray-50 p-6 rounded-2xl border border-border transition-colors hover:bg-white hover:border-primary/30 hover:shadow-md"
+                >
+                  <Avatar className="w-16 h-16 border-2 border-white shadow-sm">
+                    <AvatarImage
+                      src={
+                        listing.owner_avatar_url ??
+                        (listing.owner_full_name
+                          ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(listing.owner_full_name)}`
+                          : "https://api.dicebear.com/7.x/avataaars/svg?seed=tourigo-host")
+                      }
+                    />
+                    <AvatarFallback>
+                      {listing.owner_full_name
+                        ? listing.owner_full_name
+                            .split(" ")
+                            .filter(Boolean)
+                            .map((part) => part[0])
+                            .slice(0, 2)
+                            .join("")
+                            .toUpperCase()
+                        : "TH"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-bold text-lg truncate">{listing.owner_full_name ?? tr("Hote 3ich")}</h4>
+                    <p className="text-sm text-muted-foreground">{tr("Profil verifie")}</p>
+                    <p className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                      {tr("Voir le profil")}
+                      <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                    </p>
+                  </div>
+                </Link>
+              ) : (
+                <div className="flex items-center gap-4 bg-gray-50 p-6 rounded-2xl border border-border">
+                  <Avatar className="w-16 h-16 border-2 border-white shadow-sm">
+                    <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=tourigo-host" />
+                    <AvatarFallback>TH</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h4 className="font-bold text-lg">{listing.owner_full_name ?? tr("Hote 3ich")}</h4>
+                    <p className="text-sm text-muted-foreground mb-2">{tr("Profil verifie")}</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
