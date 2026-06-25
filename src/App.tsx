@@ -15,6 +15,7 @@ import { loadGoogleIdentityScript } from "./lib/googleIdentity";
 import { prefetchListingsApi, warmupApi } from "./lib/api";
 import Accueil from "./pages/Accueil";
 import Activites from "./pages/Activites";
+import AdminUserProfile from "./pages/AdminUserProfile";
 import Dashboard from "./pages/Dashboard";
 import DetailAnnonce from "./pages/DetailAnnonce";
 import DevenirHote from "./pages/DevenirHote";
@@ -193,6 +194,14 @@ function AnimatedRoutes() {
             element={
               <ProtectedRoute>
                 <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/utilisateurs/:id"
+            element={
+              <ProtectedRoute>
+                <AdminUserProfile />
               </ProtectedRoute>
             }
           />

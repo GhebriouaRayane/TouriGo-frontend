@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowUpRight, CheckCircle2, RotateCcw, Shield, UserCheck, UserMinus2, UserPlus2, Users, UserX } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  ArrowUpRight,
+  CheckCircle2,
+  RotateCcw,
+  Shield,
+  UserCheck,
+  UserMinus2,
+  UserPlus2,
+  Users,
+  UserX,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { ApiUser, deleteAdminUserApi, getAdminUsersApi, toggleAdminUserActiveApi, updateAdminUserApi } from "../lib/api";
@@ -16,7 +26,7 @@ type StatCard = {
 };
 
 const roleLabels: Record<string, string> = {
-  user: "Utilisateur",
+  user: "Client",
   host: "Hôte",
   admin: "Admin",
 };
@@ -40,6 +50,7 @@ function safeText(value: string | null | undefined) {
 
 export default function Admin() {
   const { user, token, loading, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers] = useState<ApiUser[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
@@ -280,21 +291,21 @@ export default function Admin() {
               <button
                 type="button"
                 onClick={refreshAdminData}
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-5 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-white dark:bg-neutral-800 px-5 py-3 text-sm font-medium !text-neutral-800 dark:!text-neutral-100 transition-colors hover:bg-accent"
               >
                 <RotateCcw className="h-4 w-4" />
                 Actualiser
               </button>
               <Link
                 to="/dashboard"
-                className="inline-flex items-center gap-2 rounded-full bg-[#3A6080] px-5 py-3 text-sm font-medium text-white shadow-lg shadow-black/10 transition-transform hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-white dark:bg-neutral-800 px-5 py-3 text-sm font-medium !text-neutral-800 dark:!text-neutral-100 shadow-sm transition-colors hover:bg-accent"
               >
                 Ouvrir mon dashboard
                 <ArrowUpRight className="h-4 w-4" />
               </Link>
               <Link
                 to="/"
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-5 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-white dark:bg-neutral-800 px-5 py-3 text-sm font-medium !text-neutral-800 dark:!text-neutral-100 transition-colors hover:bg-accent"
               >
                 Retour au site
               </Link>
@@ -327,7 +338,8 @@ export default function Admin() {
           })}
         </section>
 
-        <article className="rounded-3xl border border-border bg-white p-5 sm:p-6 shadow-[0_10px_30px_rgba(34,45,49,0.04)]">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.9fr)]">
+          <article className="rounded-3xl border border-border bg-white p-5 sm:p-6 shadow-[0_10px_30px_rgba(34,45,49,0.04)]">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-5">
             <div>
               <h2 className="text-xl font-semibold text-[#3A6080]">Liste des utilisateurs</h2>
@@ -343,10 +355,11 @@ export default function Admin() {
                     key={role}
                     type="button"
                     onClick={() => setRoleFilter(role)}
+                    style={isActive ? { color: "#ffffff" } : undefined}
                     className={`rounded-full px-3 py-2 text-sm font-medium transition-colors ${
                       isActive
-                        ? "bg-[#3A6080] text-white"
-                        : "border border-border bg-white text-foreground hover:bg-accent"
+                        ? "bg-primary hover:opacity-90"
+                        : "border border-border bg-white dark:bg-neutral-800 !text-neutral-800 dark:!text-neutral-100 hover:bg-accent focus:!text-neutral-800 dark:focus:!text-neutral-100 active:!text-neutral-800 dark:active:!text-neutral-100"
                     }`}
                   >
                     {role === "all" ? "Tous" : roleLabels[role]}
@@ -389,7 +402,19 @@ export default function Admin() {
 
               <div className="divide-y divide-border">
                 {filteredUsers.map((account) => (
-                  <div key={account.id} className="grid gap-4 px-4 py-4 lg:grid-cols-[1.1fr_1.2fr_0.9fr_0.8fr_1fr_auto] lg:items-center">
+                  <div
+                    key={account.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => navigate(`/admin/utilisateurs/${account.id}`)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        navigate(`/admin/utilisateurs/${account.id}`);
+                      }
+                    }}
+                    className="grid gap-4 px-4 py-4 lg:grid-cols-[1.1fr_1.2fr_0.9fr_0.8fr_1fr_auto] lg:items-center cursor-pointer transition-colors hover:bg-[rgb(250,251,252)]"
+                  >
                     <div>
                       <div className="font-semibold text-[#3A6080] flex items-center gap-2">
                         {account.full_name || account.email}
@@ -416,45 +441,75 @@ export default function Admin() {
                     <div className="flex flex-wrap gap-2 justify-start lg:justify-end">
                       <button
                         type="button"
-                        onClick={() => changeUserRole(account, "user")}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          changeUserRole(account, "user");
+                        }}
                         disabled={actionUserId === account.id || account.role === "user"}
-                        className="inline-flex items-center gap-1 rounded-full border border-border bg-white px-3 py-2 text-xs font-medium text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                        style={account.role === "user" ? { color: "#ffffff" } : undefined}
+                        className={`inline-flex items-center gap-1 rounded-full px-3 py-2 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 active:bg-primary ${
+                          account.role === "user"
+                            ? "bg-primary"
+                            : "border border-border bg-white dark:bg-neutral-800 !text-neutral-800 dark:!text-neutral-100 hover:bg-accent active:!text-white"
+                        }`}
                       >
                         <UserMinus2 className="h-3.5 w-3.5" />
-                        User
+                        Client
                       </button>
                       <button
                         type="button"
-                        onClick={() => changeUserRole(account, "host")}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          changeUserRole(account, "host");
+                        }}
                         disabled={actionUserId === account.id || account.role === "host"}
-                        className="inline-flex items-center gap-1 rounded-full border border-border bg-white px-3 py-2 text-xs font-medium text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                        style={account.role === "host" ? { color: "#ffffff" } : undefined}
+                        className={`inline-flex items-center gap-1 rounded-full px-3 py-2 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 active:bg-primary ${
+                          account.role === "host"
+                            ? "bg-primary"
+                            : "border border-border bg-white dark:bg-neutral-800 !text-neutral-800 dark:!text-neutral-100 hover:bg-accent active:!text-white"
+                        }`}
                       >
                         <UserCheck className="h-3.5 w-3.5" />
                         Hôte
                       </button>
                       <button
                         type="button"
-                        onClick={() => changeUserRole(account, "admin")}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          changeUserRole(account, "admin");
+                        }}
                         disabled={actionUserId === account.id || account.role === "admin"}
-                        className="inline-flex items-center gap-1 rounded-full border border-border bg-white px-3 py-2 text-xs font-medium text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                        style={account.role === "admin" ? { color: "#ffffff" } : undefined}
+                        className={`inline-flex items-center gap-1 rounded-full px-3 py-2 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 active:bg-primary ${
+                          account.role === "admin"
+                            ? "bg-primary"
+                            : "border border-border bg-white dark:bg-neutral-800 !text-neutral-800 dark:!text-neutral-100 hover:bg-accent active:!text-white"
+                        }`}
                       >
                         <CheckCircle2 className="h-3.5 w-3.5" />
                         Admin
                       </button>
                       <button
                         type="button"
-                        onClick={() => toggleUserActive(account)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          toggleUserActive(account);
+                        }}
                         disabled={actionUserId === account.id}
-                        className="inline-flex items-center gap-1 rounded-full bg-[#3A6080] px-3 py-2 text-xs font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex items-center gap-1 rounded-full border border-border bg-white dark:bg-neutral-800 px-3 py-2 text-xs font-medium !text-neutral-800 dark:!text-neutral-100 hover:bg-accent active:bg-primary active:!text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {account.is_active ? <UserX className="h-3.5 w-3.5" /> : <UserPlus2 className="h-3.5 w-3.5" />}
                         {account.is_active ? "Désactiver" : "Activer"}
                       </button>
                       <button
                         type="button"
-                        onClick={() => deleteUser(account)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          deleteUser(account);
+                        }}
                         disabled={actionUserId === account.id || account.id === user?.id}
-                        className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium !text-red-700 hover:bg-red-100 active:bg-primary active:!text-white active:border-primary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Supprimer
                       </button>
@@ -464,7 +519,8 @@ export default function Admin() {
               </div>
             </div>
           )}
-        </article>
+          </article>
+        </div>
       </main>
     </div>
   );
