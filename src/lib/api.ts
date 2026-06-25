@@ -239,6 +239,14 @@ export type RegisterCodeResponse = {
   debug_code: string | null;
 };
 
+export type PasswordResetCodeResponse = {
+  reset_id: number;
+  message: string;
+  target: string;
+  expires_at: string;
+  debug_code: string | null;
+};
+
 export type ApiImage = {
   id: number;
   url: string;
@@ -475,6 +483,20 @@ export function verifyRegisterCodeApi(payload: { verification_id: number; code: 
     method: "POST",
     body: payload,
   }).then(normalizeUser);
+}
+
+export function requestPasswordResetCodeApi(payload: { email: string }) {
+  return request<PasswordResetCodeResponse>("/auth/password-reset/request-code", {
+    method: "POST",
+    body: payload,
+  });
+}
+
+export function resetPasswordWithCodeApi(payload: { reset_id: number; code: string; new_password: string }) {
+  return request<{ message: string }>("/auth/password-reset/reset-password", {
+    method: "POST",
+    body: payload,
+  });
 }
 
 export function getMeApi(token: string) {

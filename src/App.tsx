@@ -12,7 +12,7 @@ import NavbarNew from "./components/NavbarNew";
 import { useAuth } from "./context/AuthContext";
 import { useLanguage } from "./context/LanguageContext";
 import { loadGoogleIdentityScript } from "./lib/googleIdentity";
-import { prefetchListingsApi, warmupApi } from "./lib/api";
+import { prefetchListingsApi, requestPasswordResetCodeApi, resetPasswordWithCodeApi, warmupApi } from "./lib/api";
 import Accueil from "./pages/Accueil";
 import Activites from "./pages/Activites";
 import AdminUserProfile from "./pages/AdminUserProfile";
@@ -284,6 +284,19 @@ function Login() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [googleSubmitting, setGoogleSubmitting] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetCode, setResetCode] = useState("");
+  const [resetNewPassword, setResetNewPassword] = useState("");
+  const [resetConfirmPassword, setResetConfirmPassword] = useState("");
+  const [resetRequestId, setResetRequestId] = useState<number | null>(null);
+  const [resetTarget, setResetTarget] = useState<string | null>(null);
+  const [resetExpiresAt, setResetExpiresAt] = useState<string | null>(null);
+  const [resetDebugCode, setResetDebugCode] = useState<string | null>(null);
+  const [resetStep, setResetStep] = useState<"request" | "verify">("request");
+  const [resetError, setResetError] = useState<string | null>(null);
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
+  const [resetSubmitting, setResetSubmitting] = useState(false);
   const googleButtonRef = useRef<HTMLDivElement | null>(null);
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -373,6 +386,73 @@ function Login() {
     }
   };
 
+  const requestResetCode = async () => {
+    setResetError(null);
+    setResetMessage(null);
+    const emailValue = resetEmail.trim();
+    if (!emailValue) {
+      setResetError(t("auth.error.emailRequired"));
+      return;
+    }
+    setResetSubmitting(true);
+    try {
+      const response = await requestPasswordResetCodeApi({ email: emailValue });
+      setResetRequestId(response.reset_id);
+      setResetTarget(response.target);
+      setResetExpiresAt(response.expires_at);
+      setResetDebugCode(response.debug_code);
+      setResetStep("verify");
+      setResetMessage(response.message);
+    } catch (err) {
+      setResetError(err instanceof Error ? err.message : t("auth.error.loginFailed"));
+    } finally {
+      setResetSubmitting(false);
+    }
+  };
+
+  const submitNewPassword = async () => {
+    setResetError(null);
+    setResetMessage(null);
+    if (!resetRequestId) {
+      setResetError(t("auth.error.invalidSession"));
+      return;
+    }
+    if (!resetCode.trim()) {
+      setResetError(t("auth.error.invalidCode"));
+      return;
+    }
+    if (!resetNewPassword || !resetConfirmPassword) {
+      setResetError(t("auth.error.loginFailed"));
+      return;
+    }
+    if (resetNewPassword !== resetConfirmPassword) {
+      setResetError("La confirmation du nouveau mot de passe ne correspond pas.");
+      return;
+    }
+    setResetSubmitting(true);
+    try {
+      const response = await resetPasswordWithCodeApi({
+        reset_id: resetRequestId,
+        code: resetCode.trim(),
+        new_password: resetNewPassword,
+      });
+      setResetMessage(response.message);
+      setResetCode("");
+      setResetNewPassword("");
+      setResetConfirmPassword("");
+      setResetStep("request");
+      setResetRequestId(null);
+      setResetTarget(null);
+      setResetExpiresAt(null);
+      setResetDebugCode(null);
+      setResetEmail("");
+    } catch (err) {
+      setResetError(err instanceof Error ? err.message : t("auth.error.loginFailed"));
+    } finally {
+      setResetSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-[80vh] bg-background flex items-center justify-center py-20">
       <div className="max-w-md w-full mx-4">
@@ -443,6 +523,19 @@ function Login() {
               onChange={(event) => setPassword(event.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary"
             />
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setForgotPasswordOpen((current) => !current);
+                  setResetError(null);
+                  setResetMessage(null);
+                }}
+                className="text-sm font-medium text-[#3A6080] hover:text-[#335975] underline underline-offset-4"
+              >
+                {t("auth.login.forgotPassword")}
+              </button>
+            </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
             <div className="flex justify-center pt-2">
                 <button
@@ -489,6 +582,151 @@ function Login() {
                 {googleSubmitting && <p className="text-xs text-muted-foreground text-center">{t("auth.login.googleSubmitting")}</p>}
               </>
             )}
+            <div
+              className={`overflow-hidden rounded-3xl border border-border bg-muted/20 transition-all duration-300 ${
+                forgotPasswordOpen ? "max-h-[900px] opacity-100 mt-6 p-5" : "max-h-0 opacity-0 mt-0 p-0 border-transparent"
+              }`}
+            >
+              {forgotPasswordOpen && (
+                <div className="space-y-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-[#3A6080]">{t("auth.reset.title")}</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">{t("auth.reset.subtitle")}</p>
+                  </div>
+                  {resetStep === "request" ? (
+                    <div className="space-y-3">
+                      <input
+                        required
+                        type="email"
+                        placeholder={t("auth.reset.emailPlaceholder")}
+                        value={resetEmail}
+                        onChange={(event) => setResetEmail(event.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void requestResetCode();
+                        }}
+                        disabled={resetSubmitting}
+                        className={`${LOGIN_SUBMIT_BUTTON} w-full`}
+                        style={LOGIN_SUBMIT_STYLE}
+                      >
+                        {resetSubmitting ? t("auth.reset.requesting") : t("auth.reset.requestCode")}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <input
+                        required
+                        type="email"
+                        placeholder={t("auth.reset.emailPlaceholder")}
+                        value={resetEmail}
+                        onChange={(event) => setResetEmail(event.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                      />
+                      <input
+                        required
+                        inputMode="numeric"
+                        placeholder={t("auth.reset.codePlaceholder")}
+                        value={resetCode}
+                        onChange={(event) => setResetCode(event.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                      />
+                      <input
+                        required
+                        type="password"
+                        placeholder={t("auth.reset.newPasswordPlaceholder")}
+                        value={resetNewPassword}
+                        onChange={(event) => setResetNewPassword(event.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                      />
+                      <input
+                        required
+                        type="password"
+                        placeholder={t("auth.reset.confirmPasswordPlaceholder")}
+                        value={resetConfirmPassword}
+                        onChange={(event) => setResetConfirmPassword(event.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void submitNewPassword();
+                        }}
+                        disabled={resetSubmitting}
+                        className={`${LOGIN_SUBMIT_BUTTON} w-full`}
+                        style={LOGIN_SUBMIT_STYLE}
+                      >
+                        {resetSubmitting ? t("auth.reset.submitting") : t("auth.reset.submit")}
+                      </button>
+                    </div>
+                  )}
+                  {(resetTarget || resetExpiresAt || resetDebugCode || resetMessage) && (
+                    <div className="space-y-2 rounded-2xl bg-white/70 p-4 text-sm text-muted-foreground border border-border">
+                      {resetMessage && <p className="text-foreground">{resetMessage}</p>}
+                      {resetTarget && (
+                        <p>
+                          Cible: <span className="font-medium text-foreground">{resetTarget}</span>
+                        </p>
+                      )}
+                      {resetExpiresAt && (
+                        <p>
+                          Expire le:{" "}
+                          <span className="font-medium text-foreground">
+                            {new Date(resetExpiresAt).toLocaleString()}
+                          </span>
+                        </p>
+                      )}
+                      {resetDebugCode && (
+                        <p>
+                          Mode développement: code = <span className="font-medium text-foreground">{resetDebugCode}</span>
+                        </p>
+                      )}
+                      {resetStep === "verify" && resetRequestId && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setResetStep("request");
+                            setResetRequestId(null);
+                            setResetCode("");
+                            setResetNewPassword("");
+                            setResetConfirmPassword("");
+                            setResetTarget(null);
+                            setResetExpiresAt(null);
+                            setResetDebugCode(null);
+                          }}
+                          className="text-[#3A6080] font-medium underline underline-offset-4"
+                        >
+                          {t("auth.reset.requestCode")}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  {resetError && <p className="text-sm text-red-500">{resetError}</p>}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotPasswordOpen(false);
+                      setResetStep("request");
+                      setResetRequestId(null);
+                      setResetEmail("");
+                      setResetCode("");
+                      setResetNewPassword("");
+                      setResetConfirmPassword("");
+                      setResetTarget(null);
+                      setResetExpiresAt(null);
+                      setResetDebugCode(null);
+                      setResetError(null);
+                      setResetMessage(null);
+                    }}
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground underline underline-offset-4"
+                  >
+                    {t("auth.reset.backToLogin")}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </form>
       </div>
